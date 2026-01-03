@@ -6,7 +6,8 @@ import type {
   StartGameResponse,
   SubmitWordResponse,
   CompleteGameResponse,
-  FetchNextBatchResponse
+  FetchNextBatchResponse,
+  GameHistoryResponse
 } from '../types/index';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -175,4 +176,20 @@ export const getAvailableCategories = async (): Promise<Category[]> => {
   const response = await api.get('/preferences/categories?mode=simple');
   // New API returns { mode, categories } wrapper
   return response.data.data.categories;
+};
+
+// Game History API
+
+export const getGameHistory = async (
+  userId?: number,
+  page: number = 1,
+  limit: number = 10
+): Promise<GameHistoryResponse> => {
+  console.log('API Request: GET /history/detailed', { userId, page, limit });
+  const params: any = { page, limit };
+  if (userId) {
+    params.userId = userId;
+  }
+  const response = await api.get('/history/detailed', { params });
+  return response.data.data;
 };

@@ -89,3 +89,53 @@ export interface FetchNextBatchResponse {
   words: PreloadedWord[];
   totalFetched: number;
 }
+
+// Game History types
+
+export interface WordDefinition {
+  senseid: number;
+  word: string;
+  definition: string;
+  difficultyBand?: number | null;
+  difficultyScore?: number | null;
+}
+
+export interface WordHistoryEntry {
+  historyId: number;
+  defOrder: number;
+  correctWord: WordDefinition;
+  wrongDefinitions: WordDefinition[];
+  userSelection: WordDefinition | null;
+  isCorrect: boolean;
+  selectionStrategy: string;
+  timeToAnswer: number | null;
+  createdAt: Date;
+}
+
+export interface GameHistoryEntry {
+  gameId: number;
+  difficulty: string;
+  totalWords: number;
+  wordsCompleted: number;
+  correctWords: number;
+  finalScore: number;
+  timeLimit: number;
+  timeRemaining: number;
+  timerEnabled: boolean;
+  gameStatus: string;
+  failReason: string | null;
+  createdAt: Date;
+  completedAt: Date | null;
+  accuracy: number;
+  words: WordHistoryEntry[];
+}
+
+export interface GameHistoryResponse {
+  games: GameHistoryEntry[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalGames: number;
+    totalPages: number;
+  };
+}

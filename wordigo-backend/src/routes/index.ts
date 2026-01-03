@@ -29,6 +29,7 @@ router.get('/word', wordController.getWord);
 // Game routes (legacy format)
 router.post('/game/answer', gameController.submitAnswer);
 router.get('/history', gameController.getHistory);
+router.get('/history/detailed', gameController.getDetailedHistory);
 router.get('/stats/summary', gameController.getStats);
 
 // New game format routes

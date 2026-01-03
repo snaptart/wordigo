@@ -4,17 +4,19 @@ import './StartScreen.css';
 interface StartScreenProps {
   onSelectMode: (mode: 'endless' | 'sprint' | 'categories' | 'daily') => void;
   onMenuClick: () => void;
-  onProfileClick: () => void;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({
   onSelectMode,
-  onMenuClick,
-  onProfileClick
+  onMenuClick
 }) => {
   return (
     <div className="start-screen">
       <header className="start-screen-header">
+        <div className="header-spacer"></div>
+
+        <h1 className="app-title">defindable</h1>
+
         <button
           className="menu-button"
           onClick={onMenuClick}
@@ -23,16 +25,6 @@ const StartScreen: React.FC<StartScreenProps> = ({
           <div className="hamburger-line"></div>
           <div className="hamburger-line"></div>
           <div className="hamburger-line"></div>
-        </button>
-
-        <h1 className="app-title">defindable</h1>
-
-        <button
-          className="profile-button"
-          onClick={onProfileClick}
-          aria-label="Profile"
-        >
-          <div className="profile-icon"></div>
         </button>
       </header>
 

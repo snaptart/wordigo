@@ -1,14 +1,27 @@
+/* ============================================
+   WORDIGO - MAIN STYLESHEET
+   ============================================ */
+
+/* Import Design System */
+@import './styles/variables.css';
+@import './styles/components.css';
+@import './styles/utilities.css';
+
+/* ==================== GLOBAL RESET ==================== */
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* ==================== BASE STYLES ==================== */
+
 body {
-  font-family: 'Lora', serif;
-  line-height: 1.5;
-  color: #333;
-  background-color: #fff;
+  font-family: var(--font-primary);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

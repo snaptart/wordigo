@@ -3,103 +3,103 @@
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 40px 20px;
+  padding: var(--spacing-10) var(--spacing-5);
   text-align: center;
 }
 
 .results-container {
-  max-width: 500px;
+  max-width: var(--container-max-width-sm);
   width: 100%;
 }
 
 .results-title {
-  font-family: 'Lora', serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #000;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-black);
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-6);
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .game-mode-badge {
   display: inline-block;
-  margin-bottom: 1rem;
-  padding: 0.5rem 1rem;
-  background: #ffc107;
-  border-radius: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-yellow);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-sm);
 }
 
 .badge-text {
-  font-family: 'Lora', serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #000;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-black);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .final-score {
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: white;
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-6);
+  background: var(--color-white);
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-base);
 }
 
 .score-label {
-  font-family: 'Lora', serif;
-  font-size: 1rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2);
 }
 
 .score-value {
-  font-family: 'Lora', serif;
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #000;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-black);
   line-height: 1;
 }
 
 .results-breakdown {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
 }
 
 .breakdown-item {
-  padding: 1rem;
-  background: white;
+  padding: var(--spacing-4);
+  background: var(--color-white);
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-base);
   text-align: left;
 }
 
 .breakdown-label {
-  font-family: 'Lora', serif;
-  font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 0.25rem;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-1);
 }
 
 .breakdown-value {
-  font-family: 'Lora', serif;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #000;
-  margin-bottom: 0.25rem;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-black);
+  margin-bottom: var(--spacing-1);
 }
 
 .breakdown-points {
-  font-family: 'Lora', serif;
-  font-size: 0.875rem;
-  color: #666;
-  font-weight: 400;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
 }
 
 .breakdown-divider {
@@ -108,23 +108,23 @@
 
 .play-again-button {
   width: 100%;
-  padding: 1.25rem;
-  font-family: 'Lora', serif;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #000;
-  background: white;
+  padding: var(--spacing-5);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-black);
+  background: var(--color-white);
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-base);
 }
 
 .play-again-button:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-  background: #f9fafb;
+  box-shadow: var(--shadow-lg);
+  background: var(--color-bg-hover);
 }
 
 .play-again-button:active {
@@ -133,50 +133,50 @@
 
 @media (max-width: 768px) {
   .game-results {
-    padding: 16px 16px;
+    padding: var(--spacing-4) var(--spacing-4);
   }
 
   .results-title {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-4);
   }
 
   .final-score {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
   }
 
   .score-label {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
   }
 
   .score-value {
-    font-size: 2rem;
+    font-size: var(--font-size-4xl);
   }
 
   .results-breakdown {
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
   }
 
   .breakdown-item {
-    padding: 0.75rem;
+    padding: var(--spacing-3);
   }
 
   .breakdown-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 
   .breakdown-value {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
   }
 
   .breakdown-points {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
   }
 
   .play-again-button {
-    padding: 1rem;
-    font-size: 1rem;
+    padding: var(--spacing-4);
+    font-size: var(--font-size-base);
   }
 }

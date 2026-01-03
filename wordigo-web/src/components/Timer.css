@@ -2,12 +2,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: var(--spacing-3);
 }
 
 .timer-time {
-  font-size: 64px;
-  font-family: 'Lora', serif;
-  font-weight: 700;
+  font-size: var(--font-size-8xl);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
 }

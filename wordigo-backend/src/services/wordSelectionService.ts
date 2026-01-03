@@ -8,7 +8,8 @@ import { PrismaClient } from '@prisma/client';
 import { WordSelectionOptions, WordLengthFilter } from '../types';
 import { getUserPreferences, getAdaptiveDifficultyBand } from './userPreferencesService';
 import categoryGroupService from './categoryGroupService';
-import { GameWord, WordData, getRandomWord as getBasicRandomWord, getNearSynonymWord, getAntonymWord, getRandomDifferentDomain } from './wordService';
+import { GameWord, WordData, getRandomWord as getBasicRandomWord } from './wordService';
+import { getWrongDefinitions } from './wrongDefinitionService';
 
 const prisma = new PrismaClient();
 
@@ -318,116 +319,32 @@ async function getWrongDefinitionsWithFilter(
     console.log(`[WrongDefs] Filtering to ${categoryDomainIds.length} category domains`);
   }
 
-  // We need 3 wrong definitions using different strategies
+  // Get 3 wrong definitions using centralized wrong definition service
+  const wrongDefResults = await getWrongDefinitions(correctWordData, difficultyBand, {
+    wordLengthFilter,
+    categoryDomainIds,
+    allowObscureWords
+  });
 
-  // Strategy 1: Near-synonym using semantic relationships
-  const casedOperator = 'ILIKE';
-  let nearSynonym = await getNearSynonymWord(correctWordData, excludedSynsetIds, casedOperator, difficultyBand);
-
-  // Apply word length and category filters to near-synonym result
-  if (nearSynonym) {
-    const wordLength = nearSynonym.lemma.length;
-    const meetsLengthFilter = wordLengthFilter === 'all' ||
-      (wordLength >= threshold.min && wordLength <= threshold.max);
-    const meetsCategoryFilter = !categoryDomainIds || categoryDomainIds.length === 0 ||
-      categoryDomainIds.includes(nearSynonym.lexdomainid);
-
-    if (!meetsLengthFilter || !meetsCategoryFilter) {
-      console.log(`[WrongDefs] Near-synonym "${nearSynonym.lemma}" filtered out (length: ${wordLength}, domain: ${nearSynonym.lexdomainid})`);
-      nearSynonym = null;
-    }
+  // Convert results to the format expected by this service
+  for (const wrongDef of wrongDefResults) {
+    wrongWords.push({
+      ...wrongDef.word,
+      word: cleanWord(wrongDef.word),
+      badDefinition: capitalizeFirstLetter(wrongDef.word.definition),
+      strategy: wrongDef.strategy
+    });
+    excludedSynsetIds.push(wrongDef.word.synsetid);
   }
 
-  if (nearSynonym) {
-    wrongWords.push({
-      ...nearSynonym,
-      word: cleanWord(nearSynonym),
-      badDefinition: capitalizeFirstLetter(nearSynonym.definition),
-      strategy: 'near_synonym'
-    });
-    excludedSynsetIds.push(nearSynonym.synsetid);
-    console.log(`[WrongDefs] Found near_synonym word: ${nearSynonym.lemma} (${nearSynonym.lemma.length} chars, domain: ${nearSynonym.lexdomainid})`);
-  } else {
-    console.warn(`[WrongDefs] No near-synonym found, using fallback`);
+  // Fill any missing slots with random fallback words
+  while (wrongWords.length < 3) {
+    console.warn(`[WrongDefs] Missing wrong definition ${wrongWords.length + 1}, using fallback`);
     const fallbackWord = await getBasicRandomWord(difficultyBand);
-    const fallback = fallbackWord.wrongWords[0];
+    const fallback = fallbackWord.wrongWords[wrongWords.length];
     wrongWords.push({
       ...fallback,
-      strategy: 'near_synonym_fallback'
-    });
-    excludedSynsetIds.push(fallback.synsetid);
-  }
-
-  // Strategy 2: Antonym
-  let antonym = await getAntonymWord(correctWordData, excludedSynsetIds, casedOperator, difficultyBand);
-
-  // Apply word length and category filters to antonym result
-  if (antonym) {
-    const wordLength = antonym.lemma.length;
-    const meetsLengthFilter = wordLengthFilter === 'all' ||
-      (wordLength >= threshold.min && wordLength <= threshold.max);
-    const meetsCategoryFilter = !categoryDomainIds || categoryDomainIds.length === 0 ||
-      categoryDomainIds.includes(antonym.lexdomainid);
-
-    if (!meetsLengthFilter || !meetsCategoryFilter) {
-      console.log(`[WrongDefs] Antonym "${antonym.lemma}" filtered out (length: ${wordLength}, domain: ${antonym.lexdomainid})`);
-      antonym = null;
-    }
-  }
-
-  if (antonym) {
-    wrongWords.push({
-      ...antonym,
-      word: cleanWord(antonym),
-      badDefinition: capitalizeFirstLetter(antonym.definition),
-      strategy: 'antonym'
-    });
-    excludedSynsetIds.push(antonym.synsetid);
-    console.log(`[WrongDefs] Found antonym word: ${antonym.lemma} (${antonym.lemma.length} chars, domain: ${antonym.lexdomainid})`);
-  } else {
-    console.warn(`[WrongDefs] No antonym found, using fallback`);
-    const fallbackWord = await getBasicRandomWord(difficultyBand);
-    const fallback = fallbackWord.wrongWords[1];
-    wrongWords.push({
-      ...fallback,
-      strategy: 'antonym_fallback'
-    });
-    excludedSynsetIds.push(fallback.synsetid);
-  }
-
-  // Strategy 3: Random different domain
-  let randomDiff = await getRandomDifferentDomain(correctWordData, excludedSynsetIds, casedOperator, difficultyBand);
-
-  // Apply word length and category filters to random result
-  if (randomDiff) {
-    const wordLength = randomDiff.lemma.length;
-    const meetsLengthFilter = wordLengthFilter === 'all' ||
-      (wordLength >= threshold.min && wordLength <= threshold.max);
-    const meetsCategoryFilter = !categoryDomainIds || categoryDomainIds.length === 0 ||
-      categoryDomainIds.includes(randomDiff.lexdomainid);
-
-    if (!meetsLengthFilter || !meetsCategoryFilter) {
-      console.log(`[WrongDefs] Random different domain "${randomDiff.lemma}" filtered out (length: ${wordLength}, domain: ${randomDiff.lexdomainid})`);
-      randomDiff = null;
-    }
-  }
-
-  if (randomDiff) {
-    wrongWords.push({
-      ...randomDiff,
-      word: cleanWord(randomDiff),
-      badDefinition: capitalizeFirstLetter(randomDiff.definition),
-      strategy: 'random_different_domain'
-    });
-    excludedSynsetIds.push(randomDiff.synsetid);
-    console.log(`[WrongDefs] Found random_different_domain word: ${randomDiff.lemma} (${randomDiff.lemma.length} chars, domain: ${randomDiff.lexdomainid})`);
-  } else {
-    console.warn(`[WrongDefs] No random different domain found, using fallback`);
-    const fallbackWord = await getBasicRandomWord(difficultyBand);
-    const fallback = fallbackWord.wrongWords[2];
-    wrongWords.push({
-      ...fallback,
-      strategy: 'random_different_domain_fallback'
+      strategy: `${fallback.strategy}_fallback`
     });
     excludedSynsetIds.push(fallback.synsetid);
   }
