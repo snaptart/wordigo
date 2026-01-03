@@ -1,0 +1,13 @@
+.timer-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.timer-time {
+  font-size: 64px;
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

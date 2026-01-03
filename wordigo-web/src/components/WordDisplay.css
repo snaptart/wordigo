@@ -1,0 +1,25 @@
+.word-display {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.word-text {
+  font-size: 36px;
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .word-display {
+    margin: 8px 0;
+  }
+
+  .word-text {
+    font-size: 28px;
+    letter-spacing: 0.5px;
+  }
+}

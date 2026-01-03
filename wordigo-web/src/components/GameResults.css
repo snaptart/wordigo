@@ -1,0 +1,182 @@
+.game-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.results-container {
+  max-width: 500px;
+  width: 100%;
+}
+
+.results-title {
+  font-family: 'Lora', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.game-mode-badge {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  background: #ffc107;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-text {
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.final-score {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.score-label {
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.score-value {
+  font-family: 'Lora', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1;
+}
+
+.results-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.breakdown-item {
+  padding: 1rem;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.breakdown-label {
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.breakdown-value {
+  font-family: 'Lora', serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 0.25rem;
+}
+
+.breakdown-points {
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 400;
+}
+
+.breakdown-divider {
+  display: none;
+}
+
+.play-again-button {
+  width: 100%;
+  padding: 1.25rem;
+  font-family: 'Lora', serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #000;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.play-again-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  background: #f9fafb;
+}
+
+.play-again-button:active {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .game-results {
+    padding: 16px 16px;
+  }
+
+  .results-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .final-score {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .score-label {
+    font-size: 0.875rem;
+  }
+
+  .score-value {
+    font-size: 2rem;
+  }
+
+  .results-breakdown {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .breakdown-item {
+    padding: 0.75rem;
+  }
+
+  .breakdown-label {
+    font-size: 0.75rem;
+  }
+
+  .breakdown-value {
+    font-size: 1rem;
+  }
+
+  .breakdown-points {
+    font-size: 0.75rem;
+  }
+
+  .play-again-button {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}

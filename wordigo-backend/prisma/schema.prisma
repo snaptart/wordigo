@@ -1,0 +1,461 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model adjpositions {
+  synsetid Int
+  wordid   Int
+  position String  @db.VarChar(2)
+  synsets  synsets @relation(fields: [synsetid], references: [synsetid])
+  words    words   @relation(fields: [wordid], references: [wordid])
+
+  @@id([synsetid, wordid])
+}
+
+model adjpositiontypes {
+  position     String @id @db.VarChar(2)
+  positionname String @db.VarChar(24)
+}
+
+model casedwords {
+  casedwordid Int      @id
+  wordid      Int
+  cased       String   @db.VarChar(80)
+  words       words    @relation(fields: [wordid], references: [wordid])
+  senses      senses[]
+
+  @@index([wordid])
+}
+
+model challenge_completions {
+  id           Int      @id @default(autoincrement())
+  user_id      Int
+  challenge_id Int
+  score        Int
+  completed_at DateTime @default(now())
+
+  @@unique([user_id, challenge_id])
+  @@index([challenge_id])
+  @@index([user_id])
+}
+
+model daily_challenges {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @unique @db.Date
+  sense_ids  Int[]
+  created_at DateTime @default(now())
+
+  @@index([date])
+}
+
+model game_difficulty_presets {
+  id             Int     @id @default(autoincrement())
+  name           String  @unique @db.VarChar(20)
+  displayName    String  @map("display_name") @db.VarChar(50)
+  wordCount      Int     @map("word_count")
+  timeLimit      Int     @map("time_limit")
+  difficultyBand Int?    @map("difficulty_band")
+  description    String?
+  isActive       Boolean @default(true) @map("is_active")
+
+  @@index([name])
+  @@map("game_difficulty_presets")
+}
+
+model lexdomains {
+  lexdomainid   Int       @id
+  lexdomainname String    @db.VarChar(40)
+  lexdomain     String?   @db.VarChar(32)
+  pos           String?   @db.VarChar(1)
+  synsets       synsets[]
+  category_group_mappings category_group_mappings[]
+
+  @@index([lexdomainname])
+}
+
+model category_groups {
+  id           Int      @id @default(autoincrement())
+  group_key    String   @unique @db.VarChar(50)
+  display_name String   @db.VarChar(100)
+  description  String?  @db.Text
+  icon         String?  @db.VarChar(10)
+  sort_order   Int      @default(0)
+  is_active    Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  category_group_mappings category_group_mappings[]
+
+  @@index([group_key])
+  @@index([sort_order])
+  @@map("category_groups")
+}
+
+model category_group_mappings {
+  id              Int             @id @default(autoincrement())
+  group_id        Int
+  lexdomain_id    Int
+  created_at      DateTime        @default(now()) @db.Timestamp(6)
+  category_group  category_groups @relation(fields: [group_id], references: [id], onDelete: Cascade)
+  lexdomain       lexdomains      @relation(fields: [lexdomain_id], references: [lexdomainid], onDelete: Cascade)
+
+  @@unique([group_id, lexdomain_id])
+  @@index([group_id])
+  @@index([lexdomain_id])
+  @@map("category_group_mappings")
+}
+
+model lexlinks {
+  synset1id                     Int
+  word1id                       Int
+  synset2id                     Int
+  word2id                       Int
+  linkid                        Int
+  linktypes                     linktypes @relation(fields: [linkid], references: [linkid])
+  words_lexlinks_word1idTowords words     @relation("lexlinks_word1idTowords", fields: [word1id], references: [wordid])
+  words_lexlinks_word2idTowords words     @relation("lexlinks_word2idTowords", fields: [word2id], references: [wordid])
+
+  @@id([word1id, synset1id, word2id, synset2id, linkid])
+  @@index([word1id])
+  @@index([word2id])
+}
+
+model linktypes {
+  linkid   Int        @id
+  link     String?    @db.VarChar(50)
+  recurses Boolean    @default(false)
+  lexlinks lexlinks[]
+  semlinks semlinks[]
+}
+
+model morphmaps {
+  wordid  Int
+  pos     String @db.VarChar(1)
+  morphid Int
+  morphs  morphs @relation(fields: [morphid], references: [morphid])
+  words   words  @relation(fields: [wordid], references: [wordid])
+
+  @@id([morphid, pos, wordid])
+  @@index([wordid])
+}
+
+model morphs {
+  morphid   Int         @id
+  morph     String      @db.VarChar(70)
+  morphmaps morphmaps[]
+}
+
+model multiplayer_matches {
+  id            Int       @id @default(autoincrement())
+  player1_id    Int
+  player2_id    Int
+  winner_id     Int?
+  player1_score Int       @default(0)
+  player2_score Int       @default(0)
+  status        String    @db.VarChar(20)
+  created_at    DateTime  @default(now())
+  completed_at  DateTime?
+
+  @@index([player1_id])
+  @@index([player2_id])
+  @@index([status])
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model oauth_accounts {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  provider     String    @db.VarChar(50)
+  providerId   String    @map("provider_id") @db.VarChar(255)
+  accessToken  String?   @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  expiresAt    DateTime? @map("expires_at") @db.Timestamp(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamp(6)
+  user         users     @relation("UserOAuthAccounts", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_oauth_accounts_user")
+
+  @@unique([provider, providerId])
+  @@index([provider], map: "idx_oauth_accounts_provider")
+  @@index([userId], map: "idx_oauth_accounts_user_id")
+  @@map("oauth_accounts")
+}
+
+model postypes {
+  pos     String @id @db.VarChar(1)
+  posname String @db.VarChar(20)
+}
+
+model refresh_tokens {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique @db.VarChar(500)
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      users    @relation("UserRefreshTokens", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId], map: "refresh_tokens_user_id_idx")
+  @@map("refresh_tokens")
+}
+
+model samples {
+  synsetid Int
+  sampleid Int
+  sample   String
+  synsets  synsets @relation(fields: [synsetid], references: [synsetid])
+
+  @@id([synsetid, sampleid])
+}
+
+model semlinks {
+  synset1id                           Int
+  synset2id                           Int
+  linkid                              Int
+  linktypes                           linktypes @relation(fields: [linkid], references: [linkid])
+  synsets_semlinks_synset1idTosynsets synsets   @relation("semlinks_synset1idTosynsets", fields: [synset1id], references: [synsetid])
+  synsets_semlinks_synset2idTosynsets synsets   @relation("semlinks_synset2idTosynsets", fields: [synset2id], references: [synsetid])
+
+  @@id([synset1id, synset2id, linkid])
+  @@index([synset1id])
+  @@index([synset2id])
+}
+
+model senses {
+  senseid                                                  Int                 @id
+  wordid                                                   Int
+  synsetid                                                 Int
+  casedwordid                                              Int?
+  lexid                                                    Int?
+  tagcount                                                 Int?
+  sensenum                                                 Int?
+  sensekey                                                 String?             @db.VarChar(100)
+  casedwords                                               casedwords?                      @relation(fields: [casedwordid], references: [casedwordid])
+  synsets                                                  synsets                          @relation(fields: [synsetid], references: [synsetid])
+  words                                                    words                            @relation(fields: [wordid], references: [wordid])
+  wordigo_difficulty                                       wordigo_difficulty?
+  wordigo_difficulty_calculated                            wordigo_difficulty_calculated?
+  wordigo_history_wordigo_history_senseid_falseTosenses    wordigo_history[]                @relation("wordigo_history_senseid_falseTosenses")
+  wordigo_history_wordigo_history_senseidTosenses          wordigo_history[]   @relation("wordigo_history_senseidTosenses")
+  wordigo_history_wordigo_history_senseid_selectedTosenses wordigo_history[]   @relation("wordigo_history_senseid_selectedTosenses")
+
+  @@index([casedwordid])
+  @@index([synsetid])
+  @@index([wordid])
+}
+
+model synsets {
+  synsetid                             Int                  @id
+  pos                                  String               @db.VarChar(1)
+  definition                           String
+  lexdomainid                          Int
+  adjpositions                         adjpositions[]
+  samples                              samples[]
+  semlinks_semlinks_synset1idTosynsets semlinks[]           @relation("semlinks_synset1idTosynsets")
+  semlinks_semlinks_synset2idTosynsets semlinks[]           @relation("semlinks_synset2idTosynsets")
+  senses                               senses[]
+  lexdomains                           lexdomains           @relation(fields: [lexdomainid], references: [lexdomainid])
+  vframemaps                           vframemaps[]
+  vframesentencemaps                   vframesentencemaps[]
+
+  @@index([lexdomainid])
+  @@index([pos])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model user_preferences {
+  id                       Int      @id @default(autoincrement())
+  user_id                  Int      @unique
+  default_difficulty       String   @default("adaptive") @db.VarChar(20)
+  word_length_filter       String   @default("all") @db.VarChar(20)
+  allow_obscure_words      Boolean  @default(true)
+  category_preferences     Json?
+  category_mode            String?  @default("simple") @db.VarChar(20)
+  sound_enabled            Boolean  @default(true)
+  haptic_feedback_enabled  Boolean  @default(true)
+  adaptive_difficulty_data Json?
+  created_at               DateTime @default(now()) @db.Timestamp(6)
+  updated_at               DateTime @default(now()) @db.Timestamp(6)
+  users                    users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user_preferences_user")
+
+  @@index([user_id], map: "idx_user_preferences_user_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                   Int               @id @default(autoincrement())
+  email                String            @unique @db.VarChar(255)
+  username             String            @unique @db.VarChar(50)
+  password             String?           @db.VarChar(255)
+  createdAt            DateTime          @default(now()) @map("created_at")
+  updatedAt            DateTime          @map("updated_at")
+  name                 String?           @db.VarChar(100)
+  profilePicture       String?           @map("profile_picture") @db.VarChar(500)
+  emailVerified        Boolean?          @default(false) @map("email_verified")
+  verificationToken    String?           @unique @map("verification_token") @db.VarChar(255)
+  resetPasswordToken   String?           @unique @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpires DateTime?         @map("reset_password_expires") @db.Timestamp(6)
+  lastLogin            DateTime?         @map("last_login") @db.Timestamp(6)
+  oauthAccounts        oauth_accounts[]  @relation("UserOAuthAccounts")
+  refreshTokens        refresh_tokens[]  @relation("UserRefreshTokens")
+  userPreferences      user_preferences?
+  wordigoGames         wordigo_games[]
+  wordigoHistory       wordigo_history[]
+
+  @@index([resetPasswordToken], map: "idx_users_reset_password_token")
+  @@index([verificationToken], map: "idx_users_verification_token")
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
+
+model vframemaps {
+  synsetid Int
+  wordid   Int
+  frameid  Int
+  vframes  vframes @relation(fields: [frameid], references: [frameid])
+  synsets  synsets @relation(fields: [synsetid], references: [synsetid])
+  words    words   @relation(fields: [wordid], references: [wordid])
+
+  @@id([synsetid, wordid, frameid])
+}
+
+model vframes {
+  frameid    Int          @id
+  frame      String?      @db.VarChar(50)
+  vframemaps vframemaps[]
+}
+
+model vframesentencemaps {
+  synsetid        Int
+  wordid          Int
+  sentenceid      Int
+  vframesentences vframesentences @relation(fields: [sentenceid], references: [sentenceid])
+  synsets         synsets         @relation(fields: [synsetid], references: [synsetid])
+  words           words           @relation(fields: [wordid], references: [wordid])
+
+  @@id([synsetid, wordid, sentenceid])
+}
+
+model vframesentences {
+  sentenceid         Int                  @id
+  sentence           String?
+  vframesentencemaps vframesentencemaps[]
+}
+
+model wordigo_difficulty {
+  senseid                 Int      @id
+  word_syllable_count     Int?
+  word_in_definition      Boolean? @default(false)
+  def_avg_read_score      Float?
+  def_num_chars           Int?
+  def_avg_read_score_band Int?
+  def_num_chars_band      Int?
+  senses                  senses   @relation(fields: [senseid], references: [senseid])
+
+  @@index([def_avg_read_score_band])
+  @@index([def_num_chars_band])
+}
+
+model wordigo_difficulty_calculated {
+  senseid                       Int       @id
+  wordid                        Int
+  synsetid                      Int
+  lemma                         String?   @db.VarChar(80)
+  word_length                   Int?
+  corpus_frequency              Int?
+  def_char_count                Int?
+  def_word_count                Int?
+  sense_count                   Int?
+  lexdomain_category            String?   @db.VarChar(32)
+  connectivity_score            Int?
+  hierarchy_depth               Int?
+  word_complexity_score         Decimal?  @db.Decimal(5, 2)
+  frequency_score               Decimal?  @db.Decimal(5, 2)
+  definition_complexity_score   Decimal?  @db.Decimal(5, 2)
+  sense_ambiguity_score         Decimal?  @db.Decimal(5, 2)
+  domain_difficulty_score       Decimal?  @db.Decimal(5, 2)
+  connectivity_difficulty_score Decimal?  @db.Decimal(5, 2)
+  hierarchy_difficulty_score    Decimal?  @db.Decimal(5, 2)
+  overall_difficulty_score      Decimal?  @db.Decimal(6, 2)
+  difficulty_band               Int?
+  word_in_definition            Boolean?
+  avg_word_length_in_def        Decimal?  @db.Decimal(5, 2)
+  created_at                    DateTime? @default(now()) @db.Timestamp(6)
+  senses                        senses    @relation(fields: [senseid], references: [senseid])
+
+  @@index([difficulty_band], map: "idx_difficulty_band")
+  @@index([overall_difficulty_score], map: "idx_overall_score")
+  @@index([synsetid], map: "idx_synsetid")
+  @@index([wordid], map: "idx_wordid")
+}
+
+model wordigo_games {
+  id             Int       @id @default(autoincrement())
+  userID         Int?      @map("user_ID")
+  phpSessionID   String?   @map("php_session_ID") @db.VarChar(255)
+  difficulty     String    @db.VarChar(20)
+  totalWords     Int       @map("total_words")
+  timeLimit      Int       @map("time_limit")
+  wordsCompleted Int       @default(0) @map("words_completed")
+  correctWords   Int       @default(0) @map("correct_words")
+  finalScore     Int?      @map("final_score")
+  timeRemaining  Int?      @map("time_remaining")
+  gameStatus     String    @default("in_progress") @db.VarChar(20)
+  failReason     String?   @db.VarChar(50)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  completedAt    DateTime? @map("completed_at")
+  timerEnabled   Boolean   @default(true) @map("timer_enabled")
+  users          users?    @relation(fields: [userID], references: [id])
+
+  @@index([createdAt], map: "wordigo_games_created_at_idx")
+  @@index([gameStatus], map: "wordigo_games_gameStatus_idx")
+  @@index([phpSessionID], map: "wordigo_games_php_session_ID_idx")
+  @@index([userID], map: "wordigo_games_user_ID_idx")
+  @@map("wordigo_games")
+}
+
+model wordigo_history {
+  wordigoHistoryID Int      @id @default(autoincrement()) @map("wordigo_history_ID")
+  wordigoGameID    Int?     @map("wordigo_game_ID")
+  senseid          Int
+  senseidFalse     Int      @map("senseid_false")
+  senseidSelected  Int?     @map("senseid_selected")
+  hpFlag           Int      @default(0) @map("hp_flag")
+  defOrder         Int      @map("def_order")
+  userID           Int?     @map("user_ID")
+  phpSessionID     String?  @map("php_session_ID") @db.VarChar(255)
+  wordigoTts       Int?     @map("wordigo_tts")
+  wordigoTas       Int?     @map("wordigo_tas")
+  wordigoResult    Int?     @map("wordigo_result")
+  createTs         DateTime @default(now()) @map("create_ts")
+  wrongSenseIds    Json?    @map("wrong_sense_ids")
+  falseSense       senses   @relation("wordigo_history_senseid_falseTosenses", fields: [senseidFalse], references: [senseid])
+  correctSense     senses   @relation("wordigo_history_senseidTosenses", fields: [senseid], references: [senseid])
+  selectedSense    senses?  @relation("wordigo_history_senseid_selectedTosenses", fields: [senseidSelected], references: [senseid])
+  user             users?   @relation(fields: [userID], references: [id])
+
+  @@index([createTs], map: "wordigo_history_create_ts_idx")
+  @@index([userID], map: "wordigo_history_user_ID_idx")
+  @@index([wordigoGameID], map: "wordigo_history_wordigo_game_ID_idx")
+  @@map("wordigo_history")
+}
+
+model words {
+  wordid                           Int                  @id
+  lemma                            String               @db.VarChar(80)
+  adjpositions                     adjpositions[]
+  casedwords                       casedwords[]
+  lexlinks_lexlinks_word1idTowords lexlinks[]           @relation("lexlinks_word1idTowords")
+  lexlinks_lexlinks_word2idTowords lexlinks[]           @relation("lexlinks_word2idTowords")
+  morphmaps                        morphmaps[]
+  senses                           senses[]
+  vframemaps                       vframemaps[]
+  vframesentencemaps               vframesentencemaps[]
+
+  @@index([lemma])
+}

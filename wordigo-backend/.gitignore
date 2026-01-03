@@ -1,0 +1,22 @@
+# Backend specific .gitignore
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Build
+dist/
+
+# Prisma
+prisma/migrations/*_migration/
+!prisma/migrations/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,60 @@
+.app {
+  min-height: 100vh;
+  background-color: #fff;
+}
+
+.game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px 20px 20px;
+}
+
+.definitions-container {
+  margin-top: 32px;
+  margin-bottom: 100px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .game-container {
+    padding: 16px 16px 20px 16px;
+  }
+
+  .definitions-container {
+    margin-top: 20px;
+  }
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 1rem;
+}
+
+.loading-text,
+.error-text {
+  font-size: 18px;
+  font-family: 'Lora', serif;
+  color: #666;
+}
+
+.error-container button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: #667eea;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.error-container button:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
