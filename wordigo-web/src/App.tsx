@@ -16,8 +16,9 @@ import Profile from './components/Profile';
 import Menu from './components/Menu';
 import Settings from './components/Settings';
 import GameHistory from './components/GameHistory';
+import WordLookup from './components/WordLookup';
 
-type GameState = 'start' | 'difficulty-selection' | 'playing' | 'game-over' | 'results' | 'history' | 'profile' | 'settings';
+type GameState = 'start' | 'difficulty-selection' | 'playing' | 'game-over' | 'results' | 'history' | 'profile' | 'settings' | 'word-lookup';
 type GameMode = 'endless' | 'sprint' | 'categories' | 'daily' | null;
 type AuthState = 'login' | 'signup' | 'authenticated' | 'guest';
 
@@ -353,7 +354,7 @@ function App() {
         setCorrectCount(0);
         setSelectedDefinition(null);
         setShowResult(false);
-        setIsTimerRunning(true);
+        setIsTimerRunning(false); // TODO: Disabled for development - change back to true when ready
         setGameState('playing');
         setIsLoading(false);
       } catch (err) {
@@ -449,6 +450,7 @@ function App() {
           onProfile={() => setGameState('profile')}
           onSettings={() => setGameState('settings')}
           onHistory={() => setGameState('history')}
+          onWordLookup={() => setGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={() => setAuthState('login')}
         />
@@ -509,6 +511,33 @@ function App() {
           onProfile={() => setGameState('profile')}
           onSettings={() => setGameState('settings')}
           onHistory={() => setGameState('history')}
+          onWordLookup={() => setGameState('word-lookup')}
+          onLogout={handleLogout}
+          onLogin={() => setAuthState('login')}
+        />
+      </div>
+    );
+  }
+
+  if (gameState === 'word-lookup') {
+    return (
+      <div className="app">
+        <WordLookup
+          onBack={() => setGameState('start')}
+          onMenuClick={handleMenuClick}
+          userId={user?.id}
+        />
+
+        {/* Global Menu Overlay */}
+        <Menu
+          isOpen={showMenu}
+          onClose={() => setShowMenu(false)}
+          user={user}
+          isGuest={authState === 'guest'}
+          onProfile={() => setGameState('profile')}
+          onSettings={() => setGameState('settings')}
+          onHistory={() => setGameState('history')}
+          onWordLookup={() => setGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={() => setAuthState('login')}
         />
@@ -536,6 +565,7 @@ function App() {
           onProfile={() => setGameState('profile')}
           onSettings={() => setGameState('settings')}
           onHistory={() => setGameState('history')}
+          onWordLookup={() => setGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={() => setAuthState('login')}
         />
@@ -561,6 +591,7 @@ function App() {
           onProfile={() => setGameState('profile')}
           onSettings={() => setGameState('settings')}
           onHistory={() => setGameState('history')}
+          onWordLookup={() => setGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={() => setAuthState('login')}
         />
@@ -574,28 +605,15 @@ function App() {
       <div className="game-container">
         {currentWord && (
           <div key={currentWordIndex}>
-            <WordDisplay word={currentWord.correctWord.word} />
+            <button className="back-button" onClick={resetGame}>
+              ×
+            </button>
 
-            {/* Metadata Toggle Button */}
-            <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-              <button
-                onClick={() => setShowMetadata(!showMetadata)}
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '12px',
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: '600',
-                  color: showMetadata ? '#059669' : '#6b7280',
-                  backgroundColor: showMetadata ? 'rgba(5, 150, 105, 0.1)' : '#f3f4f6',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {showMetadata ? '🔍 Hide Metadata' : '🔍 Show Metadata'}
-              </button>
-            </div>
+            <WordDisplay
+              word={currentWord.correctWord.word}
+              pos={currentWord.correctWord.pos}
+              pronunciation={currentWord.correctWord.pronunciation}
+            />
 
             <div className="definitions-container">
               {(() => {
@@ -647,6 +665,7 @@ function App() {
                 ));
               })()}
             </div>
+
           </div>
         )}
       </div>
@@ -664,7 +683,8 @@ function App() {
         strikes={strikes}
         currentWord={currentWordIndex + 1}
         totalWords={gameMode === 'endless' ? undefined : totalWords}
-        timeRemaining={timerEnabled ? timeRemaining : undefined}
+        showMetadata={showMetadata}
+        onToggleMetadata={() => setShowMetadata(!showMetadata)}
       />
 
       {/* Global Menu Overlay */}
@@ -681,6 +701,10 @@ function App() {
         onHistory={() => {
           setIsTimerRunning(false);
           setGameState('history');
+        }}
+        onWordLookup={() => {
+          setIsTimerRunning(false);
+          setGameState('word-lookup');
         }}
         onLogout={handleLogout}
         onLogin={() => setAuthState('login')}

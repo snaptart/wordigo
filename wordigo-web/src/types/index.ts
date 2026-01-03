@@ -45,6 +45,13 @@ export interface PreloadedWord {
     difficulty_band?: number | null;
     overall_difficulty_score?: number | null;
     word_in_definition?: boolean | null;
+    pos?: string;
+    pronunciation?: {
+      ipa: string;
+      syllables: string[];
+      syllableCount: number;
+      formattedSyllables: string;
+    };
   };
   wrongWords: Array<{
     senseid: number;

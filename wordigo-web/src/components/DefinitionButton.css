@@ -11,7 +11,7 @@
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-base);
+  box-shadow: none;
 }
 
 .definition-button:hover:not(.disabled) {
@@ -138,4 +138,26 @@
 .definition-button.incorrect .obscure-label {
   color: #92400e;
   background-color: rgba(146, 64, 14, 0.15);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .definition-button {
+    padding: var(--spacing-3);
+    margin: var(--spacing-2) 0;
+    font-size: var(--font-size-base);
+  }
+
+  .definition-content {
+    gap: var(--spacing-1);
+  }
+
+  .testing-info {
+    gap: var(--spacing-1);
+    margin-top: var(--spacing-1);
+  }
+
+  .strategy-label {
+    margin-top: var(--spacing-1);
+  }
 }

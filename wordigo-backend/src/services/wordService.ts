@@ -7,12 +7,28 @@
 
 import { PrismaClient } from '@prisma/client';
 import { getWrongDefinitions } from './wrongDefinitionService';
+import {
+  parseSyllablesFromIPA,
+  formatSyllablesForDisplay,
+  getSyllableCountAlgorithmic
+} from '../utils/pronunciationUtils';
+import {
+  syllabifyEnglishWord,
+  formatEnglishSyllables
+} from '../utils/englishSyllabifier';
 
 const prisma = new PrismaClient();
 
 // Constants from original PHP
 const TOTAL_WORDS = 147478;
 const DEF_NUM_CHAR_BAND_MULTIPLIER = 15; // Timer multiplier (15s per band)
+
+interface PronunciationData {
+  ipa: string;
+  syllables: string[];
+  syllableCount: number;
+  formattedSyllables: string;
+}
 
 interface WordData {
   wordid: number;
@@ -24,6 +40,7 @@ interface WordData {
   senseid: number;
   lexdomainid: number;
   lexdomainname: string;
+  pos?: string; // Part of speech (n, v, a, r, s)
   // All difficulty fields now come from wordigo_difficulty_calculated
   word_in_definition?: boolean | null;
   def_num_chars?: number | null; // Mapped from def_char_count
@@ -37,6 +54,7 @@ interface GameWord {
     word: string;
     goodDefinition: string;
     strategy: string;
+    pronunciation?: PronunciationData;
   };
   wrongWords: Array<WordData & {
     word: string;
@@ -104,6 +122,7 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
     senseid: selectedSense.senseid,
     lexdomainid: selectedSense.synsets.lexdomainid,
     lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
+    pos: selectedSense.synsets.pos,
     word_in_definition: calculatedDiff?.word_in_definition ?? null,
     def_num_chars: calculatedDiff?.def_char_count ?? null,
     overall_difficulty_score: calculatedDiff?.overall_difficulty_score ? Number(calculatedDiff.overall_difficulty_score) : null,
@@ -194,8 +213,14 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
   const charBand = defCharCount < 40 ? 1 : defCharCount < 80 ? 2 : 3;
   const timer = charBand * DEF_NUM_CHAR_BAND_MULTIPLIER;
 
+  // Fetch pronunciation data for the correct word
+  const pronunciation = await fetchPronunciationData(correctWord.word);
+
   return {
-    correctWord,
+    correctWord: {
+      ...correctWord,
+      pronunciation,
+    },
     wrongWords,
     defOrder,
     timer,
@@ -894,15 +919,10 @@ async function getWordFromSynset(
 
 /**
  * Clean definition text
- * Replicates cleanDefinition() from functions.wordigo.php:320-332
+ * Returns definition as-is without capitalization
  */
 function cleanDefinition(definition: string): string {
-  if (!definition || definition.length === 0) {
-    return definition;
-  }
-
-  // Capitalize first letter
-  return definition.charAt(0).toUpperCase() + definition.slice(1);
+  return definition;
 }
 
 /**
@@ -915,4 +935,76 @@ function cleanWord(word: WordData): string {
     : word.lemma;
 }
 
-export { GameWord, WordData };
+/**
+ * Fetch pronunciation data for a word
+ * Uses the same logic as wordLookupService
+ */
+async function fetchPronunciationData(word: string): Promise<PronunciationData | undefined> {
+  // Get pronunciation data (IPA)
+  const pronunciationRecords = await prisma.wordigo_pronunciations.findMany({
+    where: { word },
+    take: 1, // Get the first pronunciation (some words have multiple)
+  });
+
+  // Get syllable data (CMUDict)
+  const cmudictRecord = await prisma.wordigo_cmudict_syllables.findFirst({
+    where: { word },
+  });
+
+  if (pronunciationRecords.length > 0) {
+    const ipa = pronunciationRecords[0].ipa;
+    let syllableCount = 0;
+    let syllables: string[] = [];
+    let formattedSyllables = '';
+
+    if (cmudictRecord) {
+      // Use accurate CMUDict syllable data + English syllabification
+      syllableCount = cmudictRecord.syllable_count;
+      const englishSyllables = syllabifyEnglishWord(word, syllableCount);
+      syllables = englishSyllables;
+      formattedSyllables = formatEnglishSyllables(englishSyllables);
+    } else {
+      // Fall back to IPA parsing
+      const parsed = parseSyllablesFromIPA(ipa);
+      syllableCount = parsed.syllableCount;
+      syllables = parsed.syllables;
+      formattedSyllables = formatSyllablesForDisplay(
+        parsed.syllables,
+        parsed.primaryStress,
+        parsed.secondaryStress
+      );
+    }
+
+    return {
+      ipa,
+      syllables,
+      syllableCount,
+      formattedSyllables,
+    };
+  } else if (cmudictRecord) {
+    // Have CMUDict but no IPA - generate English syllables
+    const englishSyllables = syllabifyEnglishWord(word, cmudictRecord.syllable_count);
+    return {
+      ipa: '', // No IPA available
+      syllables: englishSyllables,
+      syllableCount: cmudictRecord.syllable_count,
+      formattedSyllables: formatEnglishSyllables(englishSyllables),
+    };
+  } else {
+    // Fallback: Use algorithmic syllable counting
+    const syllableCount = getSyllableCountAlgorithmic(word);
+    if (syllableCount > 0) {
+      const englishSyllables = syllabifyEnglishWord(word, syllableCount);
+      return {
+        ipa: '',
+        syllables: englishSyllables,
+        syllableCount,
+        formattedSyllables: formatEnglishSyllables(englishSyllables),
+      };
+    }
+  }
+
+  return undefined;
+}
+
+export { GameWord, WordData, fetchPronunciationData };
