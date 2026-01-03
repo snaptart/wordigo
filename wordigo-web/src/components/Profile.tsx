@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './Profile.css';
+import PageHeader from './PageHeader';
 
 interface User {
   id: number;
@@ -13,13 +14,13 @@ interface User {
 
 interface ProfileProps {
   user: User | null;
-  isOpen: boolean;
-  onClose: () => void;
+  onBack: () => void;
+  onMenuClick: () => void;
   onLogout: () => void;
   onUpdateProfile: (updatedUser: User) => void;
 }
 
-const Profile: React.FC<ProfileProps> = ({ user, isOpen, onClose, onLogout, onUpdateProfile }) => {
+const Profile: React.FC<ProfileProps> = ({ user, onBack, onMenuClick, onLogout, onUpdateProfile }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -30,30 +31,6 @@ const Profile: React.FC<ProfileProps> = ({ user, isOpen, onClose, onLogout, onUp
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-  const [shouldRender, setShouldRender] = useState(isOpen);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setShouldRender(true);
-      setIsClosing(false);
-      // Small delay to trigger the slide animation
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsAnimating(true);
-        });
-      });
-    } else if (shouldRender) {
-      setIsAnimating(false);
-      setIsClosing(true);
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-        setIsClosing(false);
-      }, 300); // Match animation duration
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, shouldRender]);
 
   const handleSaveProfile = async () => {
     setError(null);
@@ -84,9 +61,11 @@ const Profile: React.FC<ProfileProps> = ({ user, isOpen, onClose, onLogout, onUp
       }
 
       // Update local user data
-      const updatedUser = { ...user, name, email };
-      onUpdateProfile(updatedUser);
-      localStorage.setItem('wordigo_user', JSON.stringify(updatedUser));
+      if (user) {
+        const updatedUser: User = { ...user, name, email };
+        onUpdateProfile(updatedUser);
+        localStorage.setItem('wordigo_user', JSON.stringify(updatedUser));
+      }
 
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
@@ -162,20 +141,15 @@ const Profile: React.FC<ProfileProps> = ({ user, isOpen, onClose, onLogout, onUp
     });
   };
 
-  if (!shouldRender || !user) {
+  if (!user) {
     return null;
   }
 
   return (
-    <div className={`profile-overlay ${isClosing ? 'closing' : ''}`} onClick={onClose}>
-      <div className={`profile-container ${isAnimating && !isClosing ? 'open' : ''} ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
-        <div className="profile-header">
-          <h1 className="profile-title">Profile</h1>
-          <button className="close-button" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
+    <div className="profile-page">
+      <PageHeader title="Profile" onBack={onBack} onMenuClick={onMenuClick} />
 
+      <main className="profile-main">
         {error && (
           <div className="message error-message">
             {error}
@@ -371,7 +345,7 @@ const Profile: React.FC<ProfileProps> = ({ user, isOpen, onClose, onLogout, onUp
             </button>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

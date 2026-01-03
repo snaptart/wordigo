@@ -6,6 +6,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { getWrongDefinitions } from './wrongDefinitionService';
 
 const prisma = new PrismaClient();
 
@@ -49,6 +50,9 @@ interface GameWord {
 /**
  * Get a random word with correct and wrong definitions
  * Replicates get_word() from functions.wordigo.php:3-116
+ *
+ * @deprecated Use wordSelectionService.getRandomWordWithPreferences instead.
+ * This function is kept for backward compatibility and basic usage without user preferences.
  */
 export async function getRandomWord(difficulty?: number): Promise<GameWord> {
   // Pick random word from total (functions.wordigo.php:33)
@@ -114,68 +118,70 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
     strategy: 'correct',
   };
 
-  // Get 3 wrong definitions with different strategies
+  // Get 3 wrong definitions using centralized wrong definition service
+  const wrongDefResults = await getWrongDefinitions(correctWordData, correctWordData.difficulty_band);
+
+  // If we don't have all 3 wrong definitions, fill with random fallbacks
   const wrongWords: Array<WordData & { word: string; badDefinition: string; strategy: string }> = [];
-  const excludedSynsetIds: number[] = [correctWordData.synsetid];
 
-  for (let i = 0; i < 3; i++) {
-    let wrongWordData: WordData;
-    try {
-      wrongWordData = await getWrongDefinition(correctWordData, excludedSynsetIds, i);
-    } catch (error) {
-      // Fallback: if we can't find a semantically related wrong definition,
-      // just pick a completely random word
-      console.error(`Error in getWrongDefinition for strategy ${i}:`, error);
-      console.warn(`Could not find semantically related wrong definition ${i + 1}, using random word`);
-      const randomWordId = Math.floor(Math.random() * TOTAL_WORDS) + 1;
-      const randomSenses = await prisma.senses.findMany({
-        where: {
-          wordid: randomWordId,
-          synsetid: { notIn: excludedSynsetIds }
-        },
-        include: {
-          words: true,
-          synsets: { include: { lexdomains: true } },
-          casedwords: true,
-          wordigo_difficulty_calculated: true
-        },
-        take: 1
-      });
+  for (const wrongDef of wrongDefResults) {
+    wrongWords.push({
+      ...wrongDef.word,
+      word: cleanWord(wrongDef.word),
+      badDefinition: cleanDefinition(wrongDef.word.definition),
+      strategy: wrongDef.strategy,
+    });
+  }
 
-      if (randomSenses.length === 0) {
-        // If even that fails, try again with a different word
-        return getRandomWord(difficulty);
-      }
+  // Fill any missing slots with random fallback words
+  const excludedSynsetIds = [correctWordData.synsetid, ...wrongWords.map(w => w.synsetid)];
+  while (wrongWords.length < 3) {
+    const randomWordId = Math.floor(Math.random() * TOTAL_WORDS) + 1;
+    const randomSenses = await prisma.senses.findMany({
+      where: {
+        wordid: randomWordId,
+        synsetid: { notIn: excludedSynsetIds }
+      },
+      include: {
+        words: true,
+        synsets: { include: { lexdomains: true } },
+        casedwords: true,
+        wordigo_difficulty_calculated: true
+      },
+      take: 1
+    });
 
-      const sense = randomSenses[0];
-      const fallbackCalcDiff = sense.wordigo_difficulty_calculated;
-
-      wrongWordData = {
-        wordid: sense.words.wordid,
-        lemma: sense.words.lemma,
-        cased: sense.casedwords?.cased,
-        definition: sense.synsets.definition,
-        casedwordid: sense.casedwordid,
-        synsetid: sense.synsetid,
-        senseid: sense.senseid,
-        lexdomainid: sense.synsets.lexdomainid,
-        lexdomainname: sense.synsets.lexdomains.lexdomainname,
-        word_in_definition: fallbackCalcDiff?.word_in_definition ?? null,
-        def_num_chars: fallbackCalcDiff?.def_char_count ?? null,
-        overall_difficulty_score: fallbackCalcDiff?.overall_difficulty_score ? Number(fallbackCalcDiff.overall_difficulty_score) : null,
-        difficulty_band: fallbackCalcDiff?.difficulty_band ?? null,
-        strategy: 'fallback_random',
-      };
+    if (randomSenses.length === 0) {
+      // If we can't find any random word, try again with a different correct word
+      return getRandomWord(difficulty);
     }
+
+    const sense = randomSenses[0];
+    const fallbackCalcDiff = sense.wordigo_difficulty_calculated;
+
+    const wrongWordData: WordData = {
+      wordid: sense.words.wordid,
+      lemma: sense.words.lemma,
+      cased: sense.casedwords?.cased,
+      definition: sense.synsets.definition,
+      casedwordid: sense.casedwordid,
+      synsetid: sense.synsetid,
+      senseid: sense.senseid,
+      lexdomainid: sense.synsets.lexdomainid,
+      lexdomainname: sense.synsets.lexdomains.lexdomainname,
+      word_in_definition: fallbackCalcDiff?.word_in_definition ?? null,
+      def_num_chars: fallbackCalcDiff?.def_char_count ?? null,
+      overall_difficulty_score: fallbackCalcDiff?.overall_difficulty_score ? Number(fallbackCalcDiff.overall_difficulty_score) : null,
+      difficulty_band: fallbackCalcDiff?.difficulty_band ?? null,
+    };
 
     wrongWords.push({
       ...wrongWordData,
       word: cleanWord(wrongWordData),
       badDefinition: cleanDefinition(wrongWordData.definition),
-      strategy: wrongWordData.strategy || 'unknown',
+      strategy: 'fallback_random',
     });
 
-    // Exclude this synset from future selections
     excludedSynsetIds.push(wrongWordData.synsetid);
   }
 
@@ -194,64 +200,6 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
     defOrder,
     timer,
   };
-}
-
-/**
- * Get a semantically-related wrong definition using sophisticated selection strategies
- * Uses multiple strategies with fallback:
- * 1. Near-synonym: words with very similar but subtly different meanings (teaches fine distinctions)
- * 2. Antonym: opposite meaning if available
- * 3. Random: different semantic domain for variety
- *
- * All strategies now filter by difficulty band to ensure consistency
- */
-async function getWrongDefinition(
-  correctWord: WordData,
-  excludeSynsetIds: number[] = [],
-  strategyIndex: number = 0
-): Promise<WordData> {
-  const casedOperator = correctWord.casedwordid && correctWord.casedwordid > 0 ? 'gt' : 'equals';
-  // Use difficulty_band from calculated table for consistency
-  const targetBand = correctWord.difficulty_band;
-
-  console.log(`[WrongDef] Strategy ${strategyIndex + 1} - Target Band: ${targetBand}, Correct Word: ${correctWord.lemma}`);
-
-  // Try the strategy-specific approach first
-  let word: WordData | null = null;
-
-  // Strategy 1: Near-synonym (close but not quite right) - First wrong definition
-  // This teaches players to distinguish subtle differences in meaning
-  if (strategyIndex === 0) {
-    word = await getNearSynonymWord(correctWord, excludeSynsetIds, casedOperator, targetBand);
-    if (word) {
-      console.log(`[WrongDef] Strategy 1 SUCCESS - ${word.lemma} (Band: ${word.difficulty_band}, Strategy: ${word.strategy})`);
-      return word;
-    }
-  }
-
-  // Strategy 2: Antonym or contrasting concept - Second wrong definition
-  if (strategyIndex === 1) {
-    word = await getAntonymWord(correctWord, excludeSynsetIds, casedOperator, targetBand);
-    if (word) {
-      console.log(`[WrongDef] Strategy 2 SUCCESS - ${word.lemma} (Band: ${word.difficulty_band}, Strategy: ${word.strategy})`);
-      return word;
-    }
-  }
-
-  // Strategy 3: Random from same difficulty but different domain - Third wrong definition
-  if (strategyIndex === 2) {
-    word = await getRandomDifferentDomain(correctWord, excludeSynsetIds, casedOperator, targetBand);
-    if (word) {
-      console.log(`[WrongDef] Strategy 3 SUCCESS - ${word.lemma} (Band: ${word.difficulty_band}, Strategy: ${word.strategy})`);
-      return word;
-    }
-  }
-
-  // Ultimate fallback: completely random (will set its own strategy)
-  console.log(`[WrongDef] Using FALLBACK strategy`);
-  const fallbackWord = await getRandomFallback(correctWord, excludeSynsetIds, casedOperator, targetBand);
-  console.log(`[WrongDef] Fallback SUCCESS - ${fallbackWord.lemma} (Band: ${fallbackWord.difficulty_band}, Strategy: ${fallbackWord.strategy})`);
-  return fallbackWord;
 }
 
 /**

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Settings.css';
+import PageHeader from './PageHeader';
 import {
   getUserPreferences,
   updateUserPreferences,
@@ -17,19 +18,16 @@ interface User {
 
 interface SettingsProps {
   user: User | null;
-  isOpen: boolean;
-  onClose: () => void;
+  onBack: () => void;
+  onMenuClick: () => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ user, isOpen, onClose }) => {
+const Settings: React.FC<SettingsProps> = ({ user, onBack, onMenuClick }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [isClosing, setIsClosing] = useState(false);
-  const [shouldRender, setShouldRender] = useState(isOpen);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // Form state
   const [defaultDifficulty, setDefaultDifficulty] = useState<UserPreferences['defaultDifficulty']>('adaptive');
@@ -38,33 +36,12 @@ const Settings: React.FC<SettingsProps> = ({ user, isOpen, onClose }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hapticFeedbackEnabled, setHapticFeedbackEnabled] = useState(true);
 
-  // Animation control
+  // Load preferences and categories on mount
   useEffect(() => {
-    if (isOpen) {
-      setShouldRender(true);
-      setIsClosing(false);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsAnimating(true);
-        });
-      });
-    } else if (shouldRender) {
-      setIsAnimating(false);
-      setIsClosing(true);
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-        setIsClosing(false);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, shouldRender]);
-
-  // Load preferences and categories
-  useEffect(() => {
-    if (isOpen && user) {
+    if (user) {
       loadPreferencesAndCategories();
     }
-  }, [isOpen, user]);
+  }, [user]);
 
   const loadPreferencesAndCategories = async () => {
     if (!user) return;
@@ -140,20 +117,15 @@ const Settings: React.FC<SettingsProps> = ({ user, isOpen, onClose }) => {
     });
   };
 
-  if (!shouldRender || !user) {
+  if (!user) {
     return null;
   }
 
   return (
-    <div className={`settings-overlay ${isClosing ? 'closing' : ''}`} onClick={onClose}>
-      <div className={`settings-container ${isAnimating && !isClosing ? 'open' : ''} ${isClosing ? 'closing' : ''}`} onClick={(e) => e.stopPropagation()}>
-        <div className="settings-header">
-          <h1 className="settings-title">Game Settings</h1>
-          <button className="close-button" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
-        </div>
+    <div className="settings-page">
+      <PageHeader title="Settings" onBack={onBack} onMenuClick={onMenuClick} />
 
+      <main className="settings-main">
         {error && (
           <div className="message error-message">
             {error}
@@ -323,7 +295,7 @@ const Settings: React.FC<SettingsProps> = ({ user, isOpen, onClose }) => {
             </div>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };

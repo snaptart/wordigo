@@ -1,13 +1,13 @@
 .word-display {
   text-align: center;
-  margin: 16px 0;
+  margin: var(--spacing-4) 0;
 }
 
 .word-text {
-  font-size: 36px;
-  font-family: 'Lora', serif;
-  font-weight: 700;
-  color: #333;
+  font-size: 36px;  /* 36pt for desktop */
+  font-family: var(--font-primary);  /* Fraunces */
+  font-weight: var(--font-weight-bold);  /* Bold */
+  color: var(--color-text-primary);
   margin: 0;
   letter-spacing: 1px;
 }
@@ -15,11 +15,11 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .word-display {
-    margin: 8px 0;
+    margin: var(--spacing-2) 0;
   }
 
   .word-text {
-    font-size: 28px;
+    font-size: 28px;  /* 28pt for mobile */
     letter-spacing: 0.5px;
   }
 }

@@ -16,6 +16,7 @@ interface MenuProps {
   isGuest: boolean;
   onProfile?: () => void;
   onSettings?: () => void;
+  onHistory?: () => void;
   onAbout?: () => void;
   onHelp?: () => void;
   onLogout?: () => void;
@@ -29,37 +30,42 @@ const Menu: React.FC<MenuProps> = ({
   isGuest,
   onProfile,
   onSettings,
+  onHistory,
   onAbout,
   onHelp,
   onLogout,
   onLogin
 }) => {
-  const [isClosing, setIsClosing] = useState(false);
-  const [shouldRender, setShouldRender] = useState(isOpen);
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);
-      setIsClosing(false);
-    } else if (shouldRender) {
-      setIsClosing(true);
+      // Small delay to let the browser render the closed state before opening
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsAnimating(true);
+        });
+      });
+    } else {
+      setIsAnimating(false);
+      // Wait for slide-up animation to complete before unmounting
       const timer = setTimeout(() => {
         setShouldRender(false);
-        setIsClosing(false);
-      }, 300); // Match animation duration
+      }, 300); // Match transition duration
       return () => clearTimeout(timer);
     }
-  }, [isOpen, shouldRender]);
+  }, [isOpen]);
 
   if (!shouldRender) return null;
 
   return (
     <>
-      {/* Overlay */}
-      <div className={`menu-overlay ${isClosing ? 'closing' : ''}`} onClick={onClose}></div>
-
       {/* Menu Panel */}
-      <div className={`menu-panel ${isClosing ? 'closing' : ''}`}>
+      <div
+        className={`menu-panel ${isAnimating ? 'is-open' : ''}`}
+      >
         <div className="menu-header">
           <h2 className="menu-title">Menu</h2>
           <button className="menu-close" onClick={onClose} aria-label="Close">
@@ -101,6 +107,12 @@ const Menu: React.FC<MenuProps> = ({
             {user && onProfile && (
               <button className="menu-item" onClick={() => { onProfile(); onClose(); }}>
                 <span className="menu-item-text">Profile</span>
+              </button>
+            )}
+
+            {user && onHistory && (
+              <button className="menu-item" onClick={() => { onHistory(); onClose(); }}>
+                <span className="menu-item-text">Game History</span>
               </button>
             )}
 

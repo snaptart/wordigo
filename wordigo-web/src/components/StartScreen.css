@@ -1,7 +1,7 @@
 .start-screen {
   width: 100%;
   min-height: 100vh;
-  background-color: #fff;
+  background-color: var(--color-bg-main);
   display: flex;
   flex-direction: column;
 }
@@ -11,55 +11,44 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  background-color: white;
-  border-bottom: 2px solid #e5e7eb;
+  padding: var(--spacing-4) var(--spacing-6);
+  background-color: var(--color-white);
+  border-bottom: var(--border-width-base) solid var(--color-border-light);
   position: relative;
 }
 
-.menu-button,
-.profile-button {
+.menu-button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: var(--spacing-2);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s;
-}
-
-.menu-button {
   flex-direction: column;
   align-items: stretch;
+  justify-content: center;
   gap: 5px;
+  transition: opacity var(--transition-fast);
 }
 
-.menu-button:hover,
-.profile-button:hover {
+.menu-button:hover {
   opacity: 0.7;
 }
 
-.menu-button:active,
-.profile-button:active {
+.menu-button:active {
   opacity: 0.5;
+}
+
+.header-spacer {
+  width: 40px;
+  height: 40px;
 }
 
 /* Hamburger Menu */
 .hamburger-line {
   width: 28px;
   height: 3px;
-  background-color: #333;
+  background-color: var(--color-text-primary);
   border-radius: 2px;
-}
-
-/* Profile Icon */
-.profile-icon {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #333;
-  border-radius: 50%;
-  background-color: white;
 }
 
 /* App Title */
@@ -67,22 +56,22 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
   margin: 0;
-  font-family: 'Lora', serif;
-  letter-spacing: 0.05em;
-  color: #000;
+  font-family: var(--font-primary);
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-black);
 }
 
 /* Main Content */
 .start-screen-content {
   flex: 1;
-  padding: 3rem 2rem;
+  padding: var(--spacing-12) var(--spacing-8);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  max-width: 1200px;
+  gap: var(--spacing-8);
+  max-width: var(--container-max-width-xl);
   margin: 0 auto;
   width: 100%;
 }
@@ -91,34 +80,34 @@
 .game-modes {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: var(--spacing-6);
   width: 100%;
 }
 
 .game-mode-card {
   aspect-ratio: 1;
-  background-color: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  background-color: var(--color-white);
+  border: var(--border-width-base) solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: var(--spacing-6);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-base);
 }
 
 .game-mode-card:hover:not(:disabled) {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-  border-color: #d1d5db;
-  background: #f9fafb;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-medium);
+  background: var(--color-bg-hover);
 }
 
 .game-mode-card:active:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .game-mode-card.game-mode-disabled {
@@ -127,37 +116,37 @@
 }
 
 .mode-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #000;
-  font-family: 'Lora', serif;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-black);
+  font-family: var(--font-primary);
 }
 
 /* Daily Challenge */
 .daily-challenge {
   width: 100%;
-  padding: 2rem;
-  background-color: white;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
+  padding: var(--spacing-8);
+  background-color: var(--color-white);
+  border: var(--border-width-base) solid var(--color-border-light);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-base);
 }
 
 .daily-challenge:hover:not(:disabled) {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-  border-color: #d1d5db;
-  background: #f9fafb;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-medium);
+  background: var(--color-bg-hover);
 }
 
 .daily-challenge:active:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .daily-challenge.daily-challenge-disabled {
@@ -166,34 +155,34 @@
 }
 
 .daily-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #000;
-  font-family: 'Lora', serif;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-black);
+  font-family: var(--font-primary);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .game-modes {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: var(--spacing-6);
   }
 
   .app-title {
-    font-size: 2rem;
+    font-size: var(--font-size-4xl);
   }
 
   .mode-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 
   .daily-title {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 
   .start-screen-content {
-    padding: 2rem 1rem;
-    gap: 2rem;
+    padding: var(--spacing-8) var(--spacing-4);
+    gap: var(--spacing-8);
   }
 }
 

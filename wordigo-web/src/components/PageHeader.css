@@ -1,0 +1,99 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4) var(--spacing-6);
+  background-color: var(--color-white);
+  border-bottom: var(--border-width-base) solid var(--color-border-light);
+  position: relative;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.page-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  font-family: var(--font-primary);
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-black);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--transition-fast);
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-primary);
+  width: 40px;
+  height: 40px;
+}
+
+.back-button:hover {
+  opacity: 0.7;
+}
+
+.back-button:active {
+  opacity: 0.5;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-2);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 5px;
+  transition: opacity var(--transition-fast);
+  width: 40px;
+  height: 40px;
+}
+
+.menu-button:hover {
+  opacity: 0.7;
+}
+
+.menu-button:active {
+  opacity: 0.5;
+}
+
+.hamburger-line {
+  width: 28px;
+  height: 3px;
+  background-color: var(--color-text-primary);
+  border-radius: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: var(--font-size-4xl);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .page-title {
+    font-size: 2.25rem;
+  }
+}

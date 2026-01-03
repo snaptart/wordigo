@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import {
   validateAnswer,
   getGameHistory,
+  getDetailedGameHistory,
   getGameStats,
   startGame,
   submitWordAnswer,
@@ -62,7 +63,7 @@ export async function submitAnswer(req: Request, res: Response) {
 
 /**
  * GET /api/history
- * Get user's game history
+ * Get user's game history (word-level)
  */
 export async function getHistory(req: Request, res: Response) {
   try {
@@ -87,6 +88,33 @@ export async function getHistory(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       error: 'Failed to get history',
+    });
+  }
+}
+
+/**
+ * GET /api/history/detailed
+ * Get detailed game history with all words and selections
+ */
+export async function getDetailedHistory(req: Request, res: Response) {
+  try {
+    const { page = '1', limit = '10', userId } = req.query;
+
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const userIdNum = userId ? parseInt(userId as string) : undefined;
+
+    const history = await getDetailedGameHistory(userIdNum, pageNum, limitNum);
+
+    res.json({
+      success: true,
+      data: history,
+    });
+  } catch (error) {
+    console.error('Error in getDetailedHistory:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get detailed history',
     });
   }
 }

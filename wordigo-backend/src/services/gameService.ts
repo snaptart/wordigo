@@ -186,6 +186,167 @@ export async function getGameHistory(
 }
 
 /**
+ * Get detailed game history with individual games and word-level data
+ * Optimized for game history page display
+ */
+export async function getDetailedGameHistory(
+  userId?: number,
+  page: number = 1,
+  limit: number = 20
+) {
+  const skip = (page - 1) * limit;
+
+  // Build where clause - only get completed games
+  const where = userId
+    ? { userID: userId, gameStatus: { in: ['completed', 'failed'] } }
+    : { gameStatus: { in: ['completed', 'failed'] } };
+
+  // Get games with pagination
+  const games = await prisma.wordigo_games.findMany({
+    where,
+    skip,
+    take: limit,
+    orderBy: { createdAt: 'desc' },
+  });
+
+  // Get total count for pagination
+  const totalGames = await prisma.wordigo_games.count({ where });
+
+  // For each game, get all word history entries with full details
+  const gamesWithHistory = await Promise.all(
+    games.map(async (game) => {
+      const wordHistory = await prisma.wordigo_history.findMany({
+        where: { wordigoGameID: game.id },
+        orderBy: { defOrder: 'asc' },
+        include: {
+          correctSense: {
+            include: {
+              words: true,
+              synsets: true,
+              wordigo_difficulty_calculated: {
+                select: {
+                  difficulty_band: true,
+                  overall_difficulty_score: true,
+                }
+              }
+            },
+          },
+          selectedSense: {
+            include: {
+              words: true,
+              synsets: true,
+            },
+          },
+        },
+      });
+
+      // For each word history, get the wrong definitions based on wrongSenseIds
+      const wordsWithDetails = await Promise.all(
+        wordHistory.map(async (word) => {
+          const wrongSenseIds = word.wrongSenseIds as number[] || [];
+
+          // Fetch all wrong senses with their words and definitions
+          const wrongSenses = await prisma.senses.findMany({
+            where: {
+              senseid: { in: wrongSenseIds }
+            },
+            include: {
+              words: true,
+              synsets: true,
+              wordigo_difficulty_calculated: {
+                select: {
+                  difficulty_band: true,
+                  overall_difficulty_score: true,
+                }
+              }
+            }
+          });
+
+          // Determine selection strategy based on what data is available
+          let selectionStrategy = 'unknown';
+          if (word.correctSense?.wordigo_difficulty_calculated) {
+            const correctBand = word.correctSense.wordigo_difficulty_calculated.difficulty_band;
+            const wrongBands = wrongSenses
+              .map(s => s.wordigo_difficulty_calculated?.difficulty_band)
+              .filter(b => b !== null && b !== undefined);
+
+            if (wrongBands.length > 0) {
+              const avgWrongBand = wrongBands.reduce((sum, b) => sum + (b || 0), 0) / wrongBands.length;
+              if (Math.abs((correctBand || 0) - avgWrongBand) <= 1) {
+                selectionStrategy = 'difficulty_matched';
+              } else {
+                selectionStrategy = 'random';
+              }
+            }
+          }
+
+          return {
+            historyId: word.wordigoHistoryID,
+            defOrder: word.defOrder,
+            correctWord: {
+              senseid: word.correctSense.senseid,
+              word: word.correctSense.words.lemma,
+              definition: word.correctSense.synsets.definition,
+              difficultyBand: word.correctSense.wordigo_difficulty_calculated?.difficulty_band,
+              difficultyScore: word.correctSense.wordigo_difficulty_calculated?.overall_difficulty_score,
+            },
+            wrongDefinitions: wrongSenses.map(sense => ({
+              senseid: sense.senseid,
+              word: sense.words.lemma,
+              definition: sense.synsets.definition,
+              difficultyBand: sense.wordigo_difficulty_calculated?.difficulty_band,
+              difficultyScore: sense.wordigo_difficulty_calculated?.overall_difficulty_score,
+            })),
+            userSelection: word.senseidSelected ? {
+              senseid: word.senseidSelected,
+              word: word.selectedSense?.words.lemma || 'Unknown',
+              definition: word.selectedSense?.synsets.definition || 'Unknown',
+            } : null,
+            isCorrect: word.wordigoResult === 4,
+            selectionStrategy,
+            timeToAnswer: word.wordigoTas,
+            createdAt: word.createTs,
+          };
+        })
+      );
+
+      // Calculate accuracy for this game
+      const correctCount = wordsWithDetails.filter(w => w.isCorrect).length;
+      const totalAttempts = wordsWithDetails.length;
+      const accuracy = totalAttempts > 0 ? (correctCount / totalAttempts) * 100 : 0;
+
+      return {
+        gameId: game.id,
+        difficulty: game.difficulty,
+        totalWords: game.totalWords,
+        wordsCompleted: game.wordsCompleted,
+        correctWords: game.correctWords,
+        finalScore: game.finalScore || 0,
+        timeLimit: game.timeLimit,
+        timeRemaining: game.timeRemaining || 0,
+        timerEnabled: game.timerEnabled,
+        gameStatus: game.gameStatus,
+        failReason: game.failReason,
+        createdAt: game.createdAt,
+        completedAt: game.completedAt,
+        accuracy: Math.round(accuracy * 10) / 10,
+        words: wordsWithDetails,
+      };
+    })
+  );
+
+  return {
+    games: gamesWithHistory,
+    pagination: {
+      page,
+      limit,
+      totalGames,
+      totalPages: Math.ceil(totalGames / limit),
+    },
+  };
+}
+
+/**
  * Get game statistics for a user
  */
 export async function getGameStats(userId?: number) {

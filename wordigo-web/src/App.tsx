@@ -15,8 +15,9 @@ import SignUp from './components/SignUp';
 import Profile from './components/Profile';
 import Menu from './components/Menu';
 import Settings from './components/Settings';
+import GameHistory from './components/GameHistory';
 
-type GameState = 'start' | 'difficulty-selection' | 'playing' | 'game-over' | 'results';
+type GameState = 'start' | 'difficulty-selection' | 'playing' | 'game-over' | 'results' | 'history' | 'profile' | 'settings';
 type GameMode = 'endless' | 'sprint' | 'categories' | 'daily' | null;
 type AuthState = 'login' | 'signup' | 'authenticated' | 'guest';
 
@@ -33,9 +34,7 @@ function App() {
   const [authState, setAuthState] = useState<AuthState>('login');
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [showProfile, setShowProfile] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
 
   // Game state
   const [gameState, setGameState] = useState<GameState>('start');
@@ -370,22 +369,10 @@ function App() {
 
   // Handle menu click
   const handleMenuClick = () => {
-    setShowMenu(true);
+    console.log('handleMenuClick called - toggling showMenu');
+    setShowMenu(prev => !prev);
   };
 
-  // Handle profile click
-  const handleProfileClick = () => {
-    if (user) {
-      // Show profile modal
-      setShowProfile(true);
-    } else if (authState === 'guest') {
-      // Prompt guest to sign up or log in
-      const wantToLogin = window.confirm('You are playing as a guest. Would you like to log in to save your progress?');
-      if (wantToLogin) {
-        setAuthState('login');
-      }
-    }
-  };
 
   // Reset game to start screen
   const resetGame = () => {
@@ -447,32 +434,21 @@ function App() {
           <StartScreen
             onSelectMode={handleSelectMode}
             onMenuClick={handleMenuClick}
-            onProfileClick={handleProfileClick}
           />
         )}
 
-        {/* Global Overlays - Always Available */}
-        <Profile
-          user={user}
-          isOpen={showProfile}
-          onClose={() => setShowProfile(false)}
-          onLogout={handleLogout}
-          onUpdateProfile={handleUpdateProfile}
-        />
-
-        <Settings
-          user={user}
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-        />
-
+        {/* Global Menu Overlay */}
         <Menu
           isOpen={showMenu}
-          onClose={() => setShowMenu(false)}
+          onClose={() => {
+            console.log('Menu onClose called - setting showMenu to false');
+            setShowMenu(false);
+          }}
           user={user}
           isGuest={authState === 'guest'}
-          onProfile={() => setShowProfile(true)}
-          onSettings={() => setShowSettings(true)}
+          onProfile={() => setGameState('profile')}
+          onSettings={() => setGameState('settings')}
+          onHistory={() => setGameState('history')}
           onLogout={handleLogout}
           onLogin={() => setAuthState('login')}
         />
@@ -511,6 +487,83 @@ function App() {
     return (
       <div className="app">
         <GameResults results={gameResults} onPlayAgain={resetGame} strikes={strikes} timerEnabled={timerEnabled} />
+      </div>
+    );
+  }
+
+  if (gameState === 'history') {
+    return (
+      <div className="app">
+        <GameHistory
+          onBack={() => setGameState('start')}
+          onMenuClick={handleMenuClick}
+          userId={user?.id}
+        />
+
+        {/* Global Menu Overlay */}
+        <Menu
+          isOpen={showMenu}
+          onClose={() => setShowMenu(false)}
+          user={user}
+          isGuest={authState === 'guest'}
+          onProfile={() => setGameState('profile')}
+          onSettings={() => setGameState('settings')}
+          onHistory={() => setGameState('history')}
+          onLogout={handleLogout}
+          onLogin={() => setAuthState('login')}
+        />
+      </div>
+    );
+  }
+
+  if (gameState === 'profile') {
+    return (
+      <div className="app">
+        <Profile
+          user={user}
+          onBack={() => setGameState('start')}
+          onMenuClick={handleMenuClick}
+          onLogout={handleLogout}
+          onUpdateProfile={handleUpdateProfile}
+        />
+
+        {/* Global Menu Overlay */}
+        <Menu
+          isOpen={showMenu}
+          onClose={() => setShowMenu(false)}
+          user={user}
+          isGuest={authState === 'guest'}
+          onProfile={() => setGameState('profile')}
+          onSettings={() => setGameState('settings')}
+          onHistory={() => setGameState('history')}
+          onLogout={handleLogout}
+          onLogin={() => setAuthState('login')}
+        />
+      </div>
+    );
+  }
+
+  if (gameState === 'settings') {
+    return (
+      <div className="app">
+        <Settings
+          user={user}
+          onBack={() => setGameState('start')}
+          onMenuClick={handleMenuClick}
+        />
+
+        {/* Global Menu Overlay */}
+        <Menu
+          isOpen={showMenu}
+          onClose={() => setShowMenu(false)}
+          user={user}
+          isGuest={authState === 'guest'}
+          onProfile={() => setGameState('profile')}
+          onSettings={() => setGameState('settings')}
+          onHistory={() => setGameState('history')}
+          onLogout={handleLogout}
+          onLogin={() => setAuthState('login')}
+        />
       </div>
     );
   }
@@ -614,28 +667,21 @@ function App() {
         timeRemaining={timerEnabled ? timeRemaining : undefined}
       />
 
-      {/* Global Overlays - Always Available */}
-      <Profile
-        user={user}
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
-        onLogout={handleLogout}
-        onUpdateProfile={handleUpdateProfile}
-      />
-
-      <Settings
-        user={user}
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
-
+      {/* Global Menu Overlay */}
       <Menu
         isOpen={showMenu}
-        onClose={() => setShowMenu(false)}
+        onClose={() => {
+          console.log('Menu onClose called (playing state) - setting showMenu to false');
+          setShowMenu(false);
+        }}
         user={user}
         isGuest={authState === 'guest'}
-        onProfile={() => setShowProfile(true)}
-        onSettings={() => setShowSettings(true)}
+        onProfile={() => setGameState('profile')}
+        onSettings={() => setGameState('settings')}
+        onHistory={() => {
+          setIsTimerRunning(false);
+          setGameState('history');
+        }}
         onLogout={handleLogout}
         onLogin={() => setAuthState('login')}
       />

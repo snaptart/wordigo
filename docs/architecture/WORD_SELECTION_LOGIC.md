@@ -111,50 +111,49 @@ Each game word requires:
 - **1 correct definition** (labeled as "correct")
 - **3 wrong definitions** using different selection strategies
 
-The three wrong definitions use progressively different strategies to create variety and balance:
+The three wrong definitions use the following strategies to create variety and balance:
 
-### Strategy 1: Similar (Sibling/Hypernym/Adjacent Domain)
+### Strategy 1: Near-Synonym (Semantically Related)
 
-**Purpose**: Create plausible distractors that make players think
+**Purpose**: Create highly plausible distractors that teach fine semantic distinctions
 
 **Priority Order**:
 
-1. **Sibling Concepts** (Coordinate Terms)
+1. **Hyponyms** (More Specific Terms)
+   - More specific versions of the concept
+   - Example: For "dog", select "terrier"
+   - Label: `near_synonym_hyponym`
+
+2. **Hypernyms** (More General Terms)
+   - More general/abstract terms
+   - Example: For "terrier", select "dog"
+   - Label: `near_synonym_hypernym`
+
+3. **Similar/Also** (Related Concepts)
+   - Explicitly related concepts via WordNet
+   - Label: `near_synonym_similar` or `near_synonym_also`
+
+4. **Meronyms/Holonyms** (Part-Whole Relationships)
+   - Parts or wholes related to the concept
+   - Example: "wheel" for "car" or vice versa
+   - Label: `near_synonym_member_meronym`, `near_synonym_part_holonym`, etc.
+
+5. **Sibling Concepts** (Coordinate Terms - Fallback)
    - Words that share the same parent category
    - Example: For "dog", select "cat" (both are animals)
-   - Found via: hypernym → hyponym relationships in WordNet
-   - Label: `[Sibling]`
+   - Label: `near_synonym_sibling`
 
-2. **Hypernyms** (Broader Categories)
-   - More general/abstract terms
-   - Example: For "rose", select "flower"
-   - Includes: hypernym, also_see, meronym relationships
-   - Label: `[Hypernym]`
+6. **Same Domain** (Final Fallback)
+   - Words from the same lexical domain with similar definition length
+   - Label: `near_synonym_same_domain`
 
-3. **Adjacent Domains** (Related Semantic Fields)
-   - Words from semantically related lexical domains
-   - Example: For noun.person → noun.body, noun.group
-   - Predefined mappings in code
-   - Label: `[Adjacent Domain]`
+### Strategy 2: Near-Synonym (Second Semantically Related)
 
-### Strategy 2: Antonym/Contrast
+**Purpose**: Provide another plausible distractor with subtle differences
 
-**Purpose**: Provide opposite or contrasting meanings
+**Implementation**: Same as Strategy 1, but excludes already-selected words
 
-**Priority Order**:
-
-1. **Lexical Antonyms**
-   - Direct antonym relationships in WordNet
-   - Example: For "hot", select "cold"
-   - Label: `[Antonym]`
-
-2. **Semantic Antonyms**
-   - Antonyms at the synset level
-   - Label: `[Antonym Semantic]`
-
-3. **Contrasting Domain**
-   - Falls back to adjacent domain if no antonyms exist
-   - Label: `[Contrast Domain]`
+This strategy ensures two wrong definitions are semantically related to the correct word, maximizing the challenge and educational value.
 
 ### Strategy 3: Random Different Domain
 
@@ -164,7 +163,7 @@ The three wrong definitions use progressively different strategies to create var
 - Select from same difficulty band
 - Different lexical domain than correct word
 - Maintains difficulty balance
-- Label: `[Random Different Domain]`
+- Label: `random_different_domain`
 
 ### Fallback Strategies
 
@@ -186,62 +185,138 @@ If a primary strategy fails, the system falls back progressively:
 
 ## Implementation Details
 
+### Architecture
+
+The word selection system uses a **layered architecture** with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────┐
+│         gameService.ts                      │
+│         (Game Logic Layer)                  │
+└────────────────┬────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────┐
+│    wordSelectionService.ts                  │
+│    (User Preferences & Filters Layer)       │
+│    - getRandomWordWithPreferences()         │
+│    - Applies user filters                   │
+│    - Handles adaptive difficulty            │
+└────────────────┬────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────┐
+│    wrongDefinitionService.ts ⭐ NEW         │
+│    (Strategy Layer - Single Source of Truth)│
+│    - getWrongDefinitions()                  │
+│    - Centralized strategy logic             │
+│    - No duplication                         │
+└────────────────┬────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────┐
+│    wordService.ts                           │
+│    (Primitives Layer)                       │
+│    - getNearSynonymWord()                   │
+│    - getRandomDifferentDomain()             │
+│    - getWordFromSynset()                    │
+│    - Database queries                       │
+└─────────────────────────────────────────────┘
+```
+
 ### Key Functions
 
-#### `getRandomWord(difficultyBand: number)`
-Main entry point for word selection. Returns one correct word and three wrong definitions.
+#### `getRandomWordWithPreferences(options: WordSelectionOptions)`
+**Main entry point** for word selection with user preferences.
 
-**Location**: [wordigo-backend/src/services/wordService.ts:50](wordigo-backend/src/services/wordService.ts#L50)
+**Location**: [wordigo-backend/src/services/wordSelectionService.ts:27](wordigo-backend/src/services/wordSelectionService.ts#L27)
 
 **Process**:
-1. Select random word from specified difficulty band
-2. Get correct definition
-3. Call `getWrongDefinition()` three times with different strategy indices
-4. Exclude already-selected synsets to prevent duplicates
-5. Return game word with all definitions and strategy labels
+1. Load user preferences (difficulty, word length, categories)
+2. Apply adaptive difficulty if enabled
+3. Select correct word matching filters
+4. Call centralized `getWrongDefinitions()` for wrong definitions
+5. Apply user filters to results
+6. Return game word with all definitions and strategy labels
 
-#### `getWrongDefinition(correctWord, excludeSynsetIds, strategyIndex)`
-Selects a wrong definition using strategy-specific logic.
+#### `getWrongDefinitions(correctWord, difficultyBand, filters)`
+**Centralized strategy logic** - Single source of truth for wrong definition selection.
 
-**Location**: [wordigo-backend/src/services/wordService.ts:196](wordigo-backend/src/services/wordService.ts#L196)
+**Location**: [wordigo-backend/src/services/wrongDefinitionService.ts:38](wordigo-backend/src/services/wrongDefinitionService.ts#L38)
 
 **Parameters**:
 - `correctWord`: The word being defined
-- `excludeSynsetIds`: Synsets to exclude (prevent duplicates)
-- `strategyIndex`: 0=Similar, 1=Antonym, 2=Random Different Domain
+- `difficultyBand`: Target difficulty band (optional)
+- `filters`: Word length, category, and obscurity filters
 
-**Returns**: `WordData` object with `strategy` field set
+**Returns**: Array of `WrongDefinitionResult` objects with strategy labels
 
-#### `getSimilarWord(correctWord, excludeSynsetIds, casedOperator)`
-Implements Strategy 1: Sibling → Hypernym → Adjacent Domain
+**Strategies**:
+1. Near-synonym (semantically related)
+2. Near-synonym (second semantically related)
+3. Random different domain
 
-**Location**: [wordigo-backend/src/services/wordService.ts:232](wordigo-backend/src/services/wordService.ts#L232)
+#### `getNearSynonymWord(correctWord, excludeSynsetIds, casedOperator, targetBand)`
+**Primitive function** for finding semantically related words.
 
-#### `getAntonymWord(correctWord, excludeSynsetIds, casedOperator)`
-Implements Strategy 2: Antonym → Semantic Antonym → Contrast Domain
+**Location**: [wordigo-backend/src/services/wordService.ts:362](wordigo-backend/src/services/wordService.ts#L362)
 
-**Location**: [wordigo-backend/src/services/wordService.ts:389](wordigo-backend/src/services/wordService.ts#L389)
+**Process**:
+1. Query ALL semantic relationships via comprehensive query
+2. Prioritize link types (hyponym → hypernym → similar → meronyms)
+3. Return first match from priority list
+4. Fallback to sibling concepts or same domain
 
-#### `getRandomDifferentDomain(correctWord, excludeSynsetIds, casedOperator)`
-Implements Strategy 3: Random from different domain, same difficulty
+#### `getRandomDifferentDomain(correctWord, excludeSynsetIds, casedOperator, targetBand)`
+**Primitive function** for selecting random words from different semantic domains.
 
-**Location**: [wordigo-backend/src/services/wordService.ts:466](wordigo-backend/src/services/wordService.ts#L466)
+**Location**: [wordigo-backend/src/services/wordService.ts:698](wordigo-backend/src/services/wordService.ts#L698)
 
-#### `getWordFromSynset(synsetid, casedOperator)`
-Retrieves word data from a specific WordNet synset.
+#### `getWordFromSynset(synsetid, casedOperator, targetBand, strictBandMatch)`
+**Primitive function** for retrieving word data from a specific WordNet synset.
 
-**Location**: [wordigo-backend/src/services/wordService.ts:553](wordigo-backend/src/services/wordService.ts#L553)
+**Location**: [wordigo-backend/src/services/wordService.ts:825](wordigo-backend/src/services/wordService.ts#L825)
 
-**Important**: Uses fallback logic to handle cased/uncased word preferences
+**Important**:
+- Uses fallback logic to handle cased/uncased word preferences
+- Supports flexible band matching (±1 band) or strict matching
+
+### Refactored Architecture Benefits
+
+The current architecture (refactored January 2026) provides several key advantages:
+
+1. **No Code Duplication**
+   - Wrong definition logic exists in ONE place (`wrongDefinitionService.ts`)
+   - Previously duplicated across `wordService.ts` and `wordSelectionService.ts`
+   - Changes only need to be made once
+
+2. **Clear Separation of Concerns**
+   - **Primitives Layer**: Database queries and basic word lookups
+   - **Strategy Layer**: Wrong definition selection algorithms
+   - **Preferences Layer**: User filters and settings
+   - **Game Layer**: Game flow and state management
+
+3. **Easy to Test and Modify**
+   - Each layer can be tested independently
+   - Strategy changes don't affect primitive functions
+   - User preference changes don't affect core algorithms
+
+4. **Backup Files Available**
+   - Original implementations preserved as `.backup` files
+   - Can be restored if needed for comparison
+   - Located at: `wordigo-backend/src/services/*.backup`
 
 ### WordNet Relationships Used
 
 The selection logic leverages these WordNet semantic relationships:
 
 - **Hypernym/Hyponym**: IS-A relationships (dog is-a animal)
-- **Meronym**: Part-of relationships (wheel is-part-of car)
-- **Antonym**: Opposite meanings (hot vs cold)
-- **Also See**: Related concepts
+- **Instance Hypernym/Hyponym**: Specific instances (Albert Einstein is-a physicist)
+- **Meronym/Holonym**: Part-of relationships (wheel is-part-of car)
+- **Similar/Also**: Related concepts and "see also" relationships
+- **Verb Groups**: Related verb forms
+- **Cause/Entail**: Causal and implication relationships
+- **Attribute**: Property relationships
 - **Lexical Domains**: Semantic categories (noun.person, verb.motion, etc.)
 
 ### Prisma ORM Queries
@@ -352,6 +427,19 @@ ORDER BY count DESC;
 
 ## Future Enhancements
 
+### Completed Improvements ✅
+
+1. **Architecture Refactoring** (January 2026)
+   - Eliminated code duplication
+   - Centralized wrong definition logic
+   - Clear layered architecture
+   - Single source of truth for strategies
+
+2. **Near-Synonym Strategy** (January 2026)
+   - Replaced antonym strategy with second near-synonym
+   - Two semantically-related wrong definitions increase challenge
+   - More educational value by teaching fine distinctions
+
 ### Potential Improvements
 
 1. **Dynamic Weighting**: Adjust difficulty weights based on player performance
@@ -359,13 +447,50 @@ ORDER BY count DESC;
 3. **Domain Expansion**: Add more adjacent domain mappings
 4. **Machine Learning**: Use ML to identify effective distractors
 5. **Player Skill Matching**: Adjust difficulty band selection based on player history
+6. **A/B Testing**: Compare effectiveness of different strategy combinations
 
 ### Known Limitations
 
-1. **Limited Antonyms**: Many words don't have antonyms in WordNet
-2. **Domain Coverage**: Adjacent domain mappings only cover common domains
+1. **Semantic Coverage**: Not all words have rich semantic relationships in WordNet
+2. **Domain Coverage**: Some lexical domains have fewer words than others
 3. **Difficulty Subjectivity**: Readability scores don't capture all difficulty aspects
-4. **Static Weights**: Difficulty weights are fixed, not adaptive
+4. **Static Weights**: Difficulty weights are fixed, not adaptive (yet)
+
+---
+
+## File Structure
+
+### Service Layer Files
+
+```
+wordigo-backend/src/services/
+├── wordService.ts                    # Primitive word selection functions
+├── wrongDefinitionService.ts         # Centralized strategy logic (NEW)
+├── wordSelectionService.ts           # User preferences & filters
+├── gameService.ts                    # Game flow management
+├── userPreferencesService.ts         # User settings
+├── categoryGroupService.ts           # Category mappings
+├── wordService.ts.backup             # Backup of original
+└── wordSelectionService.ts.backup    # Backup of original
+```
+
+### Key Exports
+
+**wordService.ts**:
+- `getRandomWord()` (deprecated)
+- `getNearSynonymWord()`
+- `getRandomDifferentDomain()`
+- `getWordFromSynset()`
+- `WordData` interface
+- `GameWord` interface
+
+**wrongDefinitionService.ts** ⭐:
+- `getWrongDefinitions()` - Main function
+- `WrongDefinitionFilters` interface
+- `hasAllWrongDefinitions()`
+
+**wordSelectionService.ts**:
+- `getRandomWordWithPreferences()` - Main entry point
 
 ---
 
@@ -383,3 +508,14 @@ ORDER BY count DESC;
 - Setup: [SETUP_COMPLETE.md](SETUP_COMPLETE.md)
 - Testing: [TESTING_GUIDE.md](TESTING_GUIDE.md)
 - Phase 1: [PHASE1_COMPLETE.md](PHASE1_COMPLETE.md)
+
+---
+
+## Change Log
+
+### January 2, 2026 - Architecture Refactoring
+- Created `wrongDefinitionService.ts` as centralized strategy layer
+- Removed duplicate wrong definition logic from `wordService.ts` and `wordSelectionService.ts`
+- Changed Strategy 2 from antonym to near-synonym
+- Created backup files for rollback if needed
+- Updated this documentation to reflect new architecture

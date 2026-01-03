@@ -3,47 +3,47 @@
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  padding: 20px;
+  padding: var(--spacing-5);
 }
 
 .game-over-content {
   text-align: center;
-  padding: 48px;
+  padding: var(--spacing-12);
   background-color: #f8d7da;
-  border-radius: 12px;
-  border: 2px solid #dc3545;
-  max-width: 500px;
+  border-radius: var(--radius-lg);
+  border: var(--border-width-base) solid #dc3545;
+  max-width: var(--container-max-width-sm);
   width: 100%;
 }
 
 .game-over-title {
-  font-size: 64px;
-  font-family: 'Lora', serif;
-  font-weight: 700;
+  font-size: var(--font-size-8xl);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
   color: #dc3545;
   margin: 0;
   letter-spacing: 8px;
 }
 
 .game-over-subtitle {
-  font-size: 24px;
-  font-family: 'Lora', serif;
-  font-weight: 600;
-  color: #721c24;
-  margin: 8px 0 32px 0;
+  font-size: var(--font-size-2xl);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-error-text-dark);
+  margin: var(--spacing-2) 0 var(--spacing-8) 0;
 }
 
 .restart-button {
-  padding: 16px 32px;
-  font-size: 18px;
-  font-family: 'Lora', serif;
-  font-weight: 600;
-  color: #fff;
+  padding: var(--spacing-4) var(--spacing-8);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
   background-color: #dc3545;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-base);
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .restart-button:hover {

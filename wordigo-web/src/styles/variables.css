@@ -1,0 +1,215 @@
+/* ============================================
+   WORDIGO DESIGN SYSTEM - CSS VARIABLES
+   ============================================ */
+
+:root {
+  /* ==================== COLORS ==================== */
+
+  /* Primary Colors */
+  --color-primary: #000;
+  --color-primary-hover: #333;
+  --color-white: #fff;
+
+  /* Gray Scale */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #333;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* Semantic Colors - Error/Danger */
+  --color-error: #dc2626;
+  --color-error-dark: #b91c1c;
+  --color-error-darker: #991b1b;
+  --color-error-light: #fee2e2;
+  --color-error-lighter: #fee;
+  --color-error-border: #fcc;
+  --color-error-text: #c00;
+  --color-error-text-dark: #721c24;
+
+  /* Semantic Colors - Success */
+  --color-success: #10b981;
+  --color-success-dark: #065f46;
+  --color-success-light: #d1fae5;
+  --color-success-lighter: #efe;
+  --color-success-border: #cfc;
+  --color-success-text: #060;
+  --color-success-bg: #d4edda;
+  --color-success-text-alt: #155724;
+
+  /* Accent Colors */
+  --color-accent-blue: #667eea;
+  --color-accent-blue-dark: #5568d3;
+  --color-accent-blue-light: #e7f3ff;
+  --color-blue: #3b82f6;
+  --color-blue-dark: #2563eb;
+  --color-indigo: #4338ca;
+  --color-purple: #6f42c1;
+  --color-orange: #d97706;
+  --color-yellow: #ffc107;
+
+  /* Background Colors */
+  --color-bg-main: #fff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f9fafb;
+  --color-bg-active: #f3f4f6;
+  --color-bg-disabled: #f9fafb;
+
+  /* Text Colors */
+  --color-text-primary: #333;
+  --color-text-secondary: #666;
+  --color-text-tertiary: #999;
+  --color-text-disabled: #9ca3af;
+  --color-text-black: #000;
+  --color-text-dark: #1f2937;
+
+  /* Border Colors */
+  --color-border-light: #e5e7eb;
+  --color-border-medium: #d1d5db;
+  --color-border-dark: #9ca3af;
+  --color-border-focus: #333;
+
+  /* ==================== TYPOGRAPHY ==================== */
+
+  /* Font Families */
+  --font-primary: 'Fraunces', serif;                    /* For words */
+  --font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  /* For definitions */
+  --font-ui: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  /* For UI/buttons */
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 1.75rem;     /* 28px */
+  --font-size-4xl: 2rem;        /* 32px */
+  --font-size-5xl: 2.5rem;      /* 40px */
+  --font-size-6xl: 3rem;        /* 48px */
+  --font-size-7xl: 3.5rem;      /* 56px */
+  --font-size-8xl: 4rem;        /* 64px */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+
+  /* ==================== SPACING ==================== */
+
+  --spacing-1: 0.25rem;   /* 4px */
+  --spacing-2: 0.5rem;    /* 8px */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-7: 1.75rem;   /* 28px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-10: 2.5rem;   /* 40px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-16: 4rem;     /* 64px */
+  --spacing-20: 5rem;     /* 80px */
+
+  /* ==================== BORDERS ==================== */
+
+  /* Border Widths */
+  --border-width-thin: 1px;
+  --border-width-base: 2px;
+  --border-width-thick: 3px;
+  --border-width-extra-thick: 4px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 50%;
+
+  /* ==================== SHADOWS ==================== */
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 12px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 12px 16px rgba(0, 0, 0, 0.2);
+  --shadow-2xl: 4px 4px 16px rgba(0, 0, 0, 0.15);
+
+  /* Focused Shadows */
+  --shadow-focus: 0 0 0 3px rgba(0, 0, 0, 0.05);
+  --shadow-focus-error: 0 0 0 3px rgba(220, 38, 38, 0.1);
+
+  /* Component Shadows */
+  --shadow-error: 0 4px 6px rgba(220, 53, 69, 0.3);
+  --shadow-success: 0 4px 6px rgba(40, 167, 69, 0.3);
+  --shadow-button-hover: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+  /* ==================== TRANSITIONS ==================== */
+
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* ==================== Z-INDEX ==================== */
+
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+
+  /* ==================== BREAKPOINTS (for reference) ==================== */
+  /* Use in media queries as needed */
+  /* --breakpoint-sm: 640px; */
+  /* --breakpoint-md: 768px; */
+  /* --breakpoint-lg: 1024px; */
+  /* --breakpoint-xl: 1280px; */
+
+  /* ==================== LAYOUT ==================== */
+
+  --container-max-width-sm: 500px;
+  --container-max-width-md: 800px;
+  --container-max-width-lg: 1000px;
+  --container-max-width-xl: 1200px;
+
+  /* ==================== COMPONENT SPECIFIC ==================== */
+
+  /* Buttons */
+  --button-padding-sm: 0.5rem 1rem;
+  --button-padding-base: 0.75rem 1.5rem;
+  --button-padding-lg: 0.875rem 1.5rem;
+  --button-padding-xl: 1rem 2rem;
+
+  /* Forms */
+  --input-padding: 0.75rem 1rem;
+  --input-border: var(--border-width-base) solid var(--color-border-light);
+  --input-border-focus: var(--border-width-base) solid var(--color-border-focus);
+
+  /* Cards */
+  --card-padding-sm: 1rem;
+  --card-padding-base: 1.5rem;
+  --card-padding-lg: 2rem;
+  --card-padding-xl: 2.5rem;
+}
