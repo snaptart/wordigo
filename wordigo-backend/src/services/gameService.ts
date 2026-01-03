@@ -409,7 +409,7 @@ export async function getGameStats(userId?: number) {
  */
 
 interface PreloadedWord extends GameWord {
-  historyId: number;
+  historyId?: number; // Optional since it's set when word is displayed, not when fetched
 }
 
 interface StartGameParams {
@@ -493,25 +493,11 @@ export async function startGame(params: StartGameParams): Promise<StartGameResul
     console.log(`[GameService] Correct word: ${gameWord.correctWord.word} (Band: ${gameWord.correctWord.difficulty_band})`);
     console.log(`[GameService] Wrong words:`, gameWord.wrongWords.map(w => `${w.word} (Band: ${w.difficulty_band})`));
 
-    // Create history record for this word
-    const wrongSenseIds = gameWord.wrongWords.map(w => w.senseid);
-    const history = await prisma.wordigo_history.create({
-      data: {
-        wordigoGameID: game.id,
-        senseid: gameWord.correctWord.senseid,
-        senseidFalse: gameWord.wrongWords[0].senseid, // Keep for backward compatibility
-        wrongSenseIds: wrongSenseIds,
-        defOrder: gameWord.defOrder,
-        userID: params.userId,
-        phpSessionID: params.sessionId,
-        wordigoTts: preset.timeLimit, // Store game time limit
-        hpFlag: 0,
-      },
-    });
-
+    // Note: History record will be created when word is displayed to user
+    // No longer pre-creating history records for unplayed words
     words.push({
       ...gameWord,
-      historyId: history.wordigoHistoryID,
+      historyId: undefined, // Will be set when word is displayed
     });
   }
 
@@ -522,6 +508,53 @@ export async function startGame(params: StartGameParams): Promise<StartGameResul
     timeLimit: preset.timeLimit,
     timerEnabled,
     words,
+  };
+}
+
+interface CreateWordHistoryParams {
+  gameId: number;
+  correctSenseId: number;
+  wrongSenseIds: number[];
+  defOrder: number;
+  timeLimit: number;
+}
+
+interface CreateWordHistoryResult {
+  historyId: number;
+}
+
+/**
+ * Create history record when word is displayed to user
+ */
+export async function createWordHistory(params: CreateWordHistoryParams): Promise<CreateWordHistoryResult> {
+  const { gameId, correctSenseId, wrongSenseIds, defOrder, timeLimit } = params;
+
+  // Get game to retrieve userId and sessionId
+  const game = await prisma.wordigo_games.findUnique({
+    where: { id: gameId },
+  });
+
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  // Create history record
+  const history = await prisma.wordigo_history.create({
+    data: {
+      wordigoGameID: gameId,
+      senseid: correctSenseId,
+      senseidFalse: wrongSenseIds[0], // Keep for backward compatibility
+      wrongSenseIds: wrongSenseIds,
+      defOrder: defOrder,
+      userID: game.userID,
+      phpSessionID: game.phpSessionID,
+      wordigoTts: timeLimit,
+      hpFlag: 0,
+    },
+  });
+
+  return {
+    historyId: history.wordigoHistoryID,
   };
 }
 
@@ -675,6 +708,14 @@ export async function completeGame(params: CompleteGameParams): Promise<Complete
     throw new Error('Game not found');
   }
 
+  // Delete any unplayed word history records (where user never saw the word)
+  await prisma.wordigo_history.deleteMany({
+    where: {
+      wordigoGameID: gameId,
+      senseidSelected: null, // Word was never answered
+    },
+  });
+
   // Calculate score
   const wordPoints = game.correctWords; // 1 point per correct word
   const timeBonus = Math.max(0, timeRemaining); // 1 point per second remaining
@@ -775,25 +816,11 @@ export async function fetchNextBatch(params: FetchNextBatchParams): Promise<Fetc
       continue;
     }
 
-    // Create history record for this word
-    const wrongSenseIds = gameWord.wrongWords.map(w => w.senseid);
-    const history = await prisma.wordigo_history.create({
-      data: {
-        wordigoGameID: game.id,
-        senseid: gameWord.correctWord.senseid,
-        senseidFalse: gameWord.wrongWords[0].senseid,
-        wrongSenseIds: wrongSenseIds,
-        defOrder: gameWord.defOrder,
-        userID: game.userID,
-        phpSessionID: game.phpSessionID,
-        wordigoTts: game.timeLimit,
-        hpFlag: 0,
-      },
-    });
-
+    // Note: History record will be created when word is displayed to user
+    // No longer pre-creating history records for unplayed words
     words.push({
       ...gameWord,
-      historyId: history.wordigoHistoryID,
+      historyId: undefined, // Will be set when word is displayed
     });
 
     // Add to used list

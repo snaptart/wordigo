@@ -1,0 +1,629 @@
+/* Word Lookup Component Styles */
+
+.word-lookup-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-main);
+  display: flex;
+  flex-direction: column;
+}
+
+.word-lookup-main {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--color-bg-secondary);
+}
+
+.word-lookup-content {
+  max-width: var(--container-max-width-md);
+  margin: 0 auto;
+  padding: var(--spacing-8);
+}
+
+/* Messages */
+.message {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-base);
+  margin-bottom: var(--spacing-6);
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+}
+
+.error-message {
+  background-color: var(--color-error-lighter);
+  border: var(--border-width-thin) solid var(--color-error-border);
+  color: var(--color-error-text);
+}
+
+.success-message {
+  background-color: var(--color-success-lighter);
+  border: var(--border-width-thin) solid var(--color-success-border);
+  color: var(--color-success-text);
+}
+
+/* Search Section */
+.word-lookup-section {
+  margin-bottom: var(--spacing-6);
+  padding: var(--card-padding-lg);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-title {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-black);
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.section-description {
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-5) 0;
+  line-height: var(--line-height-normal);
+}
+
+/* Search Form */
+.word-lookup-search-form {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.word-lookup-input {
+  flex: 1;
+  padding: var(--button-padding-base);
+  font-size: var(--font-size-base);
+  font-family: var(--font-primary);
+  border: var(--border-width-base) solid var(--color-border-light);
+  border-radius: var(--radius-base);
+  outline: none;
+  transition: all var(--transition-fast);
+  color: var(--color-text-primary);
+  background-color: var(--color-white);
+}
+
+.word-lookup-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.word-lookup-input:disabled {
+  background-color: var(--color-gray-100);
+  cursor: not-allowed;
+  color: var(--color-text-secondary);
+}
+
+.word-lookup-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.primary-button {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--button-padding-base);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: var(--border-width-base) solid transparent;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.primary-button:disabled {
+  background-color: var(--color-gray-400);
+  border-color: var(--color-gray-400);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading State */
+.word-lookup-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.word-lookup-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-gray-200);
+  border-top-color: var(--color-primary);
+  border-radius: var(--radius-full);
+  animation: spin 0.8s linear infinite;
+  margin-bottom: var(--spacing-4);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.word-lookup-loading p {
+  font-family: var(--font-primary);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+/* Word Details Section */
+.word-lookup-details {
+  margin-bottom: var(--spacing-6);
+  padding: var(--card-padding-lg);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Word Header */
+.word-lookup-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-4);
+  border-bottom: var(--border-width-base) solid var(--color-border-light);
+}
+
+.word-lookup-word {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-primary);
+  color: var(--color-text-black);
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.word-lookup-difficulty {
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-lg);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: capitalize;
+}
+
+/* Pronunciation Section */
+.word-lookup-pronunciation {
+  background-color: var(--color-bg-hover);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-base);
+  margin-bottom: var(--spacing-6);
+  border: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.word-lookup-ipa,
+.word-lookup-syllables {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+}
+
+.word-lookup-ipa:last-child,
+.word-lookup-syllables:last-child {
+  margin-bottom: 0;
+}
+
+.word-lookup-ipa-label,
+.word-lookup-syllables-label {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  min-width: 5rem;
+}
+
+.word-lookup-ipa-text {
+  font-family: 'Segoe UI', 'Noto Sans', 'DejaVu Sans', Arial, sans-serif;
+  font-size: var(--font-size-xl);
+  color: var(--color-text-black);
+  letter-spacing: 0.025em;
+}
+
+.word-lookup-syllables-text {
+  font-family: 'Segoe UI', 'Noto Sans', 'DejaVu Sans', Arial, sans-serif;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-black);
+  letter-spacing: 0.05em;
+  font-weight: var(--font-weight-medium);
+}
+
+.word-lookup-syllable-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-left: var(--spacing-1);
+}
+
+/* Subsection Titles */
+.word-lookup-subsection-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+/* User History */
+.word-lookup-history {
+  background-color: var(--color-bg-hover);
+  padding: var(--spacing-5);
+  border-radius: var(--radius-base);
+  margin-bottom: var(--spacing-6);
+  border: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.word-lookup-history-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.word-lookup-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.word-lookup-stat-label {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.word-lookup-stat-value {
+  font-size: var(--font-size-xl);
+  font-family: var(--font-primary);
+  color: var(--color-text-black);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Definitions */
+.word-lookup-definitions {
+  margin-bottom: var(--spacing-6);
+}
+
+.word-lookup-pos-group {
+  margin-bottom: var(--spacing-5);
+}
+
+.word-lookup-pos-group:last-child {
+  margin-bottom: 0;
+}
+
+.word-lookup-pos-header {
+  margin: 0 0 var(--spacing-3) 0;
+  padding-bottom: var(--spacing-2);
+  border-bottom: var(--border-width-base) solid var(--color-border-light);
+}
+
+.word-lookup-pos-badge {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-base);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: capitalize;
+  letter-spacing: 0.025em;
+}
+
+.word-lookup-definition {
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4) 0;
+  border-bottom: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.word-lookup-definition:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.word-lookup-definition-number {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-primary);
+  color: var(--color-primary);
+  min-width: 30px;
+}
+
+.word-lookup-definition-content {
+  flex: 1;
+}
+
+.word-lookup-definition-text {
+  font-size: var(--font-size-base);
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.word-lookup-definition-example {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+  margin: 0;
+  padding-left: var(--spacing-3);
+  border-left: 3px solid var(--color-border-light);
+  font-style: italic;
+}
+
+/* Examples */
+.word-lookup-examples {
+  margin-bottom: 0;
+}
+
+.word-lookup-examples-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.word-lookup-example-item {
+  font-size: var(--font-size-sm);
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  padding: var(--spacing-3) var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+  background: var(--color-bg-hover);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+.word-lookup-example-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Empty State */
+.word-lookup-empty {
+  text-align: center;
+  padding: var(--spacing-12) var(--spacing-8);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.word-lookup-empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-4);
+}
+
+.word-lookup-empty h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.word-lookup-empty p {
+  font-size: var(--font-size-base);
+  font-family: var(--font-primary);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: var(--line-height-normal);
+}
+
+/* Dictionary Entry Styles - Merriam-Webster inspired */
+.dictionary-entry {
+  margin-bottom: var(--spacing-6);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.dictionary-pos-section {
+  margin-bottom: var(--spacing-8);
+  padding-bottom: var(--spacing-6);
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.dictionary-pos-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* Headword Line */
+.dictionary-headword-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.dictionary-word {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-black);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.dictionary-pronunciation {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: normal;
+  letter-spacing: 0.025em;
+}
+
+.dictionary-pos {
+  font-size: 1.125rem;
+  font-style: italic;
+  color: var(--color-text-primary);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+}
+
+.dictionary-difficulty {
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-white);
+  font-size: 0.75rem;
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: var(--spacing-2);
+}
+
+/* Syllables */
+.dictionary-syllables {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.1em;
+}
+
+/* Definitions List */
+.dictionary-definitions {
+  margin-top: var(--spacing-4);
+  line-height: 1.7;
+}
+
+.dictionary-definition-item {
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  align-items: flex-start;
+}
+
+.dictionary-definition-item:last-child {
+  margin-bottom: 0;
+}
+
+.dictionary-def-number {
+  font-weight: 700;
+  color: var(--color-text-black);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  min-width: 1.5rem;
+  flex-shrink: 0;
+}
+
+.dictionary-def-separator {
+  color: var(--color-text-secondary);
+  font-family: Georgia, 'Times New Roman', serif;
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+}
+
+.dictionary-def-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  line-height: 1.7;
+}
+
+.dictionary-def-example {
+  margin-top: var(--spacing-2);
+  padding-left: 1.75rem;
+}
+
+.dictionary-example-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.dictionary-example-text::before {
+  content: '"';
+}
+
+.dictionary-example-text::after {
+  content: '"';
+}
+
+/* Scrollbar Styling */
+.word-lookup-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.word-lookup-main::-webkit-scrollbar-track {
+  background: var(--color-gray-100);
+}
+
+.word-lookup-main::-webkit-scrollbar-thumb {
+  background: var(--color-border-medium);
+  border-radius: var(--radius-sm);
+}
+
+.word-lookup-main::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .word-lookup-content {
+    padding: var(--spacing-4);
+  }
+
+  .word-lookup-section,
+  .word-lookup-details {
+    padding: var(--card-padding-base);
+  }
+
+  .word-lookup-search-form {
+    flex-direction: column;
+  }
+
+  .word-lookup-word {
+    font-size: var(--font-size-3xl);
+  }
+
+  .word-lookup-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .word-lookup-history-stats {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dictionary entry responsive */
+  .dictionary-word {
+    font-size: 1.5rem;
+  }
+
+  .dictionary-pronunciation,
+  .dictionary-pos {
+    font-size: 1rem;
+  }
+
+  .dictionary-headword-line {
+    gap: var(--spacing-1);
+  }
+
+  .dictionary-def-text {
+    font-size: 0.95rem;
+  }
+
+  .dictionary-example-text {
+    font-size: 0.875rem;
+  }
+}

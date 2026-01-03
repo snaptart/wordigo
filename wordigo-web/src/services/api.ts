@@ -85,6 +85,23 @@ export const startGame = async (difficulty: string, timerEnabled: boolean = true
   return response.data.data;
 };
 
+export const createWordHistory = async (data: {
+  gameId: number;
+  correctSenseId: number;
+  wrongSenseIds: number[];
+  defOrder: number;
+  timeLimit: number;
+}): Promise<{ historyId: number }> => {
+  console.log('API Request: POST /game/create-word-history');
+  try {
+    const response = await api.post('/game/create-word-history', data);
+    return response.data.data;
+  } catch (error) {
+    console.error('API Response Error:', error);
+    throw error;
+  }
+};
+
 export const submitWordAnswer = async (data: {
   gameId: number;
   historyId: number;
@@ -191,5 +208,45 @@ export const getGameHistory = async (
     params.userId = userId;
   }
   const response = await api.get('/history/detailed', { params });
+  return response.data.data;
+};
+
+// Word Lookup API
+
+export interface WordLookupResponse {
+  word: string;
+  definitions: Array<{
+    id: number;
+    definition: string;
+    example?: string;
+    lexdomainName?: string;
+    pos: string;
+    posName: string;
+  }>;
+  difficulty?: string;
+  examples?: string[];
+  pronunciation?: {
+    ipa: string;
+    syllables: string[];
+    syllableCount: number;
+    formattedSyllables: string;
+  };
+  userHistory?: {
+    timesEncountered: number;
+    timesCorrect: number;
+    lastSeen?: Date;
+  };
+}
+
+export const lookupWord = async (
+  word: string,
+  userId?: number
+): Promise<WordLookupResponse> => {
+  console.log('API Request: GET /word-lookup/:word', { word, userId });
+  const params: any = {};
+  if (userId) {
+    params.userId = userId;
+  }
+  const response = await api.get(`/word-lookup/${encodeURIComponent(word)}`, { params });
   return response.data.data;
 };

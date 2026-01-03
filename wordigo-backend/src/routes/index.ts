@@ -8,6 +8,7 @@ import * as gameController from '../controllers/gameController';
 import * as userPreferencesController from '../controllers/userPreferencesController';
 import * as categoryController from '../controllers/categoryController';
 import * as authController from '../controllers/authController';
+import * as wordLookupController from '../controllers/wordLookupController';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
@@ -25,6 +26,7 @@ router.put('/auth/change-password', requireAuth, authController.changePassword);
 
 // Word routes
 router.get('/word', wordController.getWord);
+router.get('/word-lookup/:word', wordLookupController.getWordLookup);
 
 // Game routes (legacy format)
 router.post('/game/answer', gameController.submitAnswer);
@@ -35,6 +37,7 @@ router.get('/stats/summary', gameController.getStats);
 // New game format routes
 router.get('/game/presets', gameController.getPresets);
 router.post('/game/start', gameController.start);
+router.post('/game/create-word-history', gameController.createHistory);
 router.post('/game/submit-word', gameController.submitWord);
 router.post('/game/complete', gameController.complete);
 router.post('/game/fetch-next-batch', gameController.getNextBatch);

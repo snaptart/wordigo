@@ -17,6 +17,7 @@ interface MenuProps {
   onProfile?: () => void;
   onSettings?: () => void;
   onHistory?: () => void;
+  onWordLookup?: () => void;
   onAbout?: () => void;
   onHelp?: () => void;
   onLogout?: () => void;
@@ -31,6 +32,7 @@ const Menu: React.FC<MenuProps> = ({
   onProfile,
   onSettings,
   onHistory,
+  onWordLookup,
   onAbout,
   onHelp,
   onLogout,
@@ -113,6 +115,12 @@ const Menu: React.FC<MenuProps> = ({
             {user && onHistory && (
               <button className="menu-item" onClick={() => { onHistory(); onClose(); }}>
                 <span className="menu-item-text">Game History</span>
+              </button>
+            )}
+
+            {user && onWordLookup && (
+              <button className="menu-item" onClick={() => { onWordLookup(); onClose(); }}>
+                <span className="menu-item-text">Word Lookup</span>
               </button>
             )}
 

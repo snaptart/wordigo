@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { WordSelectionOptions, WordLengthFilter } from '../types';
 import { getUserPreferences, getAdaptiveDifficultyBand } from './userPreferencesService';
 import categoryGroupService from './categoryGroupService';
-import { GameWord, WordData, getRandomWord as getBasicRandomWord } from './wordService';
+import { GameWord, WordData, getRandomWord as getBasicRandomWord, fetchPronunciationData } from './wordService';
 import { getWrongDefinitions } from './wrongDefinitionService';
 
 const prisma = new PrismaClient();
@@ -95,13 +95,10 @@ export async function getRandomWordWithPreferences(
 }
 
 /**
- * Capitalize first letter of a string
+ * Return string as-is without capitalization
  */
 function capitalizeFirstLetter(str: string): string {
-  if (!str || str.length === 0) {
-    return str;
-  }
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str;
 }
 
 /**
@@ -240,6 +237,7 @@ async function getFilteredRandomWord(
       senseid: selectedSense.senseid,
       lexdomainid: selectedSense.synsets.lexdomainid,
       lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
+      pos: selectedSense.synsets.pos,
       word_in_definition: calculatedDiff?.word_in_definition ?? null,
       def_num_chars: calculatedDiff?.def_char_count ?? null,
       overall_difficulty_score: calculatedDiff?.overall_difficulty_score ? Number(calculatedDiff.overall_difficulty_score) : null,
@@ -264,13 +262,18 @@ async function getFilteredRandomWord(
     const charBand = defCharCount < 40 ? 1 : defCharCount < 80 ? 2 : 3;
     const timer = charBand * DEF_NUM_CHAR_BAND_MULTIPLIER;
 
+    // Fetch pronunciation data for the correct word
+    const wordText = cleanWord(correctWordData);
+    const pronunciation = await fetchPronunciationData(wordText);
+
     // Build the complete game word
     return {
       correctWord: {
         ...correctWordData,
-        word: cleanWord(correctWordData),
+        word: wordText,
         goodDefinition: capitalizeFirstLetter(correctWordData.definition),
-        strategy: 'correct'
+        strategy: 'correct',
+        pronunciation,
       },
       wrongWords,
       defOrder,

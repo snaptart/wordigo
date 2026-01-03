@@ -54,7 +54,7 @@ export default function DefinitionButton({
       disabled={disabled}
     >
       <div className="definition-content">
-        {definition}
+        : {definition}
         {showMetadata && (
           <div className="testing-info">
             {word && (

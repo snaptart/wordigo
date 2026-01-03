@@ -6,22 +6,83 @@
 .game-container {
   max-width: var(--container-max-width-md);
   margin: 0 auto;
-  padding: var(--spacing-10) var(--spacing-5) var(--spacing-5) var(--spacing-5);
+  padding: var(--spacing-10) var(--spacing-5) var(--spacing-20) var(--spacing-5);
+}
+
+.back-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 8px;
+  transition: color var(--transition-fast);
+  z-index: var(--z-index-sticky);
+}
+
+.back-button:hover {
+  color: var(--color-text-primary);
 }
 
 .definitions-container {
   margin-top: var(--spacing-8);
-  margin-bottom: 100px;
+  margin-bottom: var(--spacing-8);
+}
+
+.next-word-container {
+  text-align: center;
+  margin-top: var(--spacing-3);
+  margin-bottom: 0;
+}
+
+.next-word-button {
+  padding: 8px 16px;
+  font-size: var(--font-size-lg);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-transform: lowercase;
+}
+
+.next-word-button:hover {
+  color: var(--color-text-primary);
+}
+
+.next-word-button:active {
+  color: var(--color-accent-blue);
 }
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .game-container {
-    padding: var(--spacing-4) var(--spacing-4) var(--spacing-5) var(--spacing-4);
+    padding: var(--spacing-4) var(--spacing-4) 100px var(--spacing-4);
   }
 
   .definitions-container {
     margin-top: var(--spacing-5);
+  }
+
+  .back-button {
+    top: 3px;
+    right: 3px;
+    padding: 2px;
+  }
+
+  .next-word-container {
+    margin-top: var(--spacing-5 );
+    margin-bottom: 0;
+  }
+
+  .next-word-button {
+    padding: 6px 12px;
+    font-size: var(--font-size-base);
   }
 }
 

@@ -3,13 +3,50 @@
   margin: var(--spacing-4) 0;
 }
 
-.word-text {
-  font-size: 36px;  /* 36pt for desktop */
-  font-family: var(--font-primary);  /* Fraunces */
+/* Headword line - word, IPA, syllables, and POS all on same line */
+.word-headword-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.word-display .word-text {
+  font-size: 2rem;  /* 36pt for desktop */
+  font-family: var(--font-secondary);  /* Sans-serif: Inter */
   font-weight: var(--font-weight-bold);  /* Bold */
   color: var(--color-text-primary);
   margin: 0;
   letter-spacing: 1px;
+}
+
+.word-pronunciation {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);  /* Serif for IPA */
+  font-style: normal;
+  letter-spacing: 0.025em;
+  margin: 0;
+}
+
+/* Syllables - now on same line as word */
+.word-syllables {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);  /* Serif for syllables */
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+/* Part of speech - italic serif */
+.word-pos {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-text-primary);
+  font-family: Georgia, 'Times New Roman', serif;  /* Serif for POS */
+  font-weight: 500;
+  margin: 0;
 }
 
 /* Mobile optimizations */
@@ -18,8 +55,20 @@
     margin: var(--spacing-2) 0;
   }
 
-  .word-text {
+  .word-display .word-text {
     font-size: 28px;  /* 28pt for mobile */
     letter-spacing: 0.5px;
+  }
+
+  .word-pronunciation {
+    font-size: 1.125rem;
+  }
+
+  .word-syllables {
+    font-size: 0.95rem;
+  }
+
+  .word-pos {
+    font-size: 1rem;
   }
 }
