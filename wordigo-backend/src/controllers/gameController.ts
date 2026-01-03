@@ -14,7 +14,8 @@ import {
   submitWordAnswer,
   completeGame,
   getDifficultyPresets,
-  fetchNextBatch
+  fetchNextBatch,
+  createWordHistory
 } from '../services/gameService';
 import { ApiResponse, AnswerResponse } from '../types';
 
@@ -201,6 +202,44 @@ export async function start(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to start game',
+    });
+  }
+}
+
+/**
+ * POST /api/game/create-word-history
+ * Create history record when word is displayed to user
+ */
+export async function createHistory(req: Request, res: Response) {
+  try {
+    const { gameId, correctSenseId, wrongSenseIds, defOrder, timeLimit } = req.body;
+
+    // Validate required fields
+    if (!gameId || !correctSenseId || !wrongSenseIds || defOrder === undefined || !timeLimit) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields',
+      });
+    }
+
+    // Create history record
+    const result = await createWordHistory({
+      gameId,
+      correctSenseId,
+      wrongSenseIds,
+      defOrder,
+      timeLimit,
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error('Error in createHistory:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create history record',
     });
   }
 }

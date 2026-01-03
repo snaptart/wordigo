@@ -37,6 +37,7 @@ router.get('/stats/summary', gameController.getStats);
 // New game format routes
 router.get('/game/presets', gameController.getPresets);
 router.post('/game/start', gameController.start);
+router.post('/game/create-word-history', gameController.createHistory);
 router.post('/game/submit-word', gameController.submitWord);
 router.post('/game/complete', gameController.complete);
 router.post('/game/fetch-next-batch', gameController.getNextBatch);

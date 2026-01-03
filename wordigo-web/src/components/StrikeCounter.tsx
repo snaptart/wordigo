@@ -15,23 +15,20 @@ export default function StrikeCounter({ strikes, currentWord, totalWords, showMe
       {currentWord !== undefined && (
         <div className="word-progress">
           {totalWords !== undefined
-            ? `Word ${currentWord} / ${totalWords}`
-            : `Word ${currentWord}`
+            ? `word ${currentWord} / ${totalWords}`
+            : `word ${currentWord}`
           }
         </div>
       )}
       {onToggleMetadata && (
         <button
           onClick={onToggleMetadata}
-          className={`metadata-toggle-button ${showMetadata ? 'active' : 'inactive'}`}
+          className={`metadata-toggle-button ${showMetadata ? 'active' : ''}`}
         >
-          {showMetadata ? '🔍 Hide Metadata' : '🔍 Show Metadata'}
+          {showMetadata ? 'hide metadata' : 'show metadata'}
         </button>
       )}
       <div className="strike-section">
-        <div className="strike-text">
-          Strikes: {strikes}/3
-        </div>
         <div className="strike-dots">
           {[0, 1, 2].map((index) => (
             <div

@@ -85,6 +85,23 @@ export const startGame = async (difficulty: string, timerEnabled: boolean = true
   return response.data.data;
 };
 
+export const createWordHistory = async (data: {
+  gameId: number;
+  correctSenseId: number;
+  wrongSenseIds: number[];
+  defOrder: number;
+  timeLimit: number;
+}): Promise<{ historyId: number }> => {
+  console.log('API Request: POST /game/create-word-history');
+  try {
+    const response = await api.post('/game/create-word-history', data);
+    return response.data.data;
+  } catch (error) {
+    console.error('API Response Error:', error);
+    throw error;
+  }
+};
+
 export const submitWordAnswer = async (data: {
   gameId: number;
   historyId: number;

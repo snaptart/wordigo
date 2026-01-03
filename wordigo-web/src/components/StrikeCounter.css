@@ -15,44 +15,38 @@
 .word-progress {
   font-size: var(--font-size-lg);
   font-family: var(--font-primary);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-accent-blue);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-primary);
   margin-left: var(--spacing-5);
+  text-transform: lowercase;
 }
 
 .metadata-toggle-button {
   padding: 8px 16px;
-  font-size: 12px;
-  font-family: Inter, sans-serif;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  background: none;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color var(--transition-fast);
+  text-transform: lowercase;
 }
 
+.metadata-toggle-button:hover {
+  color: var(--color-text-primary);
+}
+
+.metadata-toggle-button:active,
 .metadata-toggle-button.active {
-  color: #059669;
-  background-color: rgba(5, 150, 105, 0.1);
-}
-
-.metadata-toggle-button.inactive {
-  color: #6b7280;
-  background-color: #f3f4f6;
+  color: var(--color-accent-blue);
 }
 
 .strike-section {
   display: flex;
   align-items: center;
-  gap: var(--spacing-5);
   margin-right: var(--spacing-5);
-}
-
-.strike-text {
-  font-size: var(--font-size-lg);
-  font-family: var(--font-primary);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
 }
 
 .strike-dots {
@@ -75,12 +69,23 @@
 
 @media (max-width: 768px) {
   .strike-counter {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
     padding: var(--spacing-4);
   }
 
-  .word-progress,
+  .word-progress {
+    margin: 0;
+    font-size: var(--font-size-base);
+  }
+
+  .metadata-toggle-button {
+    font-size: var(--font-size-base);
+    padding: 6px 12px;
+  }
+
   .strike-section {
     margin: 0;
   }

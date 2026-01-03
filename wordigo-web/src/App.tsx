@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import './App.css';
 import type { PreloadedWord, CompleteGameResponse } from './types/index';
-import { startGame as startGameAPI, submitWordAnswer, completeGame, fetchNextBatch, getUserPreferences } from './services/api';
+import { startGame as startGameAPI, submitWordAnswer, completeGame, fetchNextBatch, getUserPreferences, createWordHistory } from './services/api';
 import WordDisplay from './components/WordDisplay';
 import DefinitionButton from './components/DefinitionButton';
 import Timer from './components/Timer';
@@ -72,6 +72,41 @@ function App() {
   const [showMetadata, setShowMetadata] = useState(true);
 
   const currentWord = words[currentWordIndex];
+
+  // Create history record when word is displayed to user
+  useEffect(() => {
+    const createHistory = async () => {
+      if (!currentWord || !gameId || gameState !== 'playing') return;
+
+      // Skip if history record already exists
+      if (currentWord.historyId !== undefined) return;
+
+      try {
+        const wrongSenseIds = currentWord.wrongWords.map(w => w.senseid);
+        const result = await createWordHistory({
+          gameId,
+          correctSenseId: currentWord.correctWord.senseid,
+          wrongSenseIds,
+          defOrder: currentWord.defOrder,
+          timeLimit,
+        });
+
+        // Update the word in the array with the new historyId
+        setWords(prevWords => {
+          const updatedWords = [...prevWords];
+          updatedWords[currentWordIndex] = {
+            ...updatedWords[currentWordIndex],
+            historyId: result.historyId,
+          };
+          return updatedWords;
+        });
+      } catch (err) {
+        console.error('Failed to create history record:', err);
+      }
+    };
+
+    createHistory();
+  }, [currentWord, gameId, gameState, currentWordIndex, timeLimit]);
 
   // Check for existing auth on mount
   useEffect(() => {
@@ -218,7 +253,13 @@ function App() {
         console.error('Failed to submit answer', err);
       }
 
-      // Brief feedback then show game results
+      // For endless mode: don't auto-advance to results, wait for user to click "Game Over"
+      if (isEndlessMode) {
+        // Just show the feedback and wait for user to click button
+        return;
+      }
+
+      // For non-endless modes: brief feedback then show game results
       setTimeout(async () => {
         setIsTimerRunning(false);
         try {
@@ -264,35 +305,63 @@ function App() {
       return;
     }
 
-    // Not game over - move to next word quickly
     // Submit happens in background, no need to wait
     submitPromise.catch(err => {
       console.error('Failed to submit answer in background', err);
       // Could add error handling/retry logic here
     });
 
-    // For endless mode: reset timer to 3 minutes on correct answer
-    if (isEndlessMode && isCorrect) {
-      setTimeRemaining(180); // Reset to 3 minutes (180 seconds)
+    // For endless mode: don't auto-advance, wait for user to click "Next Word"
+    if (isEndlessMode) {
+      // For endless mode: reset timer to 3 minutes on correct answer
+      if (isCorrect) {
+        setTimeRemaining(180); // Reset to 3 minutes (180 seconds)
+      }
+      // Don't advance - user will click "Next Word" button
+      return;
     }
 
-    // Show brief feedback then move to next word
+    // For non-endless modes: show brief feedback then move to next word
     // Longer delay for wrong answers (750ms) vs correct (500ms)
     const feedbackDelay = isCorrect ? 500 : 750;
     setTimeout(() => {
       setSelectedDefinition(null);
       setShowResult(false);
       setCurrentWordIndex((prev) => prev + 1);
-
-      // For endless mode: check if we need to fetch next batch
-      if (isEndlessMode) {
-        const remainingWords = words.length - (currentWordIndex + 1);
-        if (remainingWords <= 5 && !isFetchingBatch) {
-          fetchMoreWords();
-        }
-      }
     }, feedbackDelay);
     // Timer keeps running!
+  };
+
+  // Handle "Next Word" button click in endless mode
+  const handleNextWord = async () => {
+    // Check if game is over (3 strikes)
+    if (strikes >= 3) {
+      setIsTimerRunning(false);
+      try {
+        const results = await completeGame({
+          gameId: gameId!,
+          timeRemaining: 0, // No time bonus for striking out
+          reason: 'strikes',
+        });
+
+        setGameResults(results);
+        setGameState('results');
+      } catch (err) {
+        console.error('Failed to complete game on strikes', err);
+      }
+      return;
+    }
+
+    // Normal next word behavior
+    setSelectedDefinition(null);
+    setShowResult(false);
+    setCurrentWordIndex((prev) => prev + 1);
+
+    // Check if we need to fetch next batch
+    const remainingWords = words.length - (currentWordIndex + 1);
+    if (remainingWords <= 5 && !isFetchingBatch) {
+      fetchMoreWords();
+    }
   };
 
   // Fetch next batch of words for endless mode
@@ -376,7 +445,20 @@ function App() {
 
 
   // Reset game to start screen
-  const resetGame = () => {
+  const resetGame = async () => {
+    // If there's an active game, complete it to cleanup unplayed records
+    if (gameId && gameState === 'playing') {
+      try {
+        await completeGame({
+          gameId,
+          timeRemaining,
+          reason: 'strikes', // Mark as abandoned
+        });
+      } catch (err) {
+        console.error('Failed to cleanup game on reset:', err);
+      }
+    }
+
     setGameState('start');
     setGameMode(null);
     setGameId(null);
@@ -664,6 +746,15 @@ function App() {
                   />
                 ));
               })()}
+
+              {/* Next Word button for endless mode - only show after answer selected */}
+              {gameMode === 'endless' && showResult && (
+                <div className="next-word-container">
+                  <button onClick={handleNextWord} className="next-word-button">
+                    {strikes >= 3 ? 'game over →' : 'next word →'}
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
