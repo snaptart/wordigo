@@ -11,8 +11,9 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd wordigo-backend && npm install && npx prisma generate && npm run build
-    startCommand: cd wordigo-backend && npx prisma migrate deploy && npm start
+    rootDir: wordigo-backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -39,8 +40,9 @@ services:
   - type: web
     name: wordigo-frontend
     env: static
-    buildCommand: cd wordigo-web && npm install && npm run build
-    staticPublishPath: wordigo-web/dist
+    rootDir: wordigo-web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     headers:
       - path: /*
         name: X-Frame-Options
