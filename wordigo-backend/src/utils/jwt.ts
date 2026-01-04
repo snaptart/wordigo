@@ -4,7 +4,7 @@
  * Handles token generation and verification
  */
 
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { JWTPayload } from '../types';
 
 const JWT_SECRET: string = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -23,10 +23,10 @@ export function generateAccessToken(userId: number, email: string, username: str
   };
 
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRY,
+    expiresIn: ACCESS_TOKEN_EXPIRY as string,
     issuer: 'wordigo-api',
     audience: 'wordigo-app'
-  });
+  } as SignOptions);
 }
 
 /**
@@ -43,10 +43,10 @@ export function generateRefreshToken(userId: number, email: string, username: st
   const expiry = rememberMe ? '90d' : REFRESH_TOKEN_EXPIRY;
 
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: expiry,
+    expiresIn: expiry as string,
     issuer: 'wordigo-api',
     audience: 'wordigo-app'
-  });
+  } as SignOptions);
 }
 
 /**
