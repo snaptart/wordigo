@@ -1,13 +1,14 @@
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: wordigo-db
+databases:
+  - name: wordigo-db
+    databaseName: wordigo
     plan: free
 
+services:
+ 
   # Backend API Service
   - type: web
     name: wordigo-backend
-    env: node
+    runtime: node
     region: oregon
     plan: free
     buildCommand: cd wordigo-backend && npm install && npx prisma generate && npm run build
@@ -50,7 +51,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: wordigo-backend
-          envVarKey: RENDER_EXTERNAL_URL
+        sync: false
