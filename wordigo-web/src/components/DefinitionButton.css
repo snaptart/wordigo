@@ -2,8 +2,8 @@
   width: 100%;
   padding: var(--spacing-5);
   margin: var(--spacing-3) 0;
-  font-size: var(--font-size-lg);  /* 18px - Inter Regular */
-  font-family: var(--font-secondary);  /* Inter for definitions */
+  font-size: var(--font-size-lg);  /* 18px - Merriweather Regular */
+  font-family: var(--font-definitions);  /* Merriweather for definitions */
   font-weight: var(--font-weight-normal);
   text-align: left;
   background-color: var(--color-white);
