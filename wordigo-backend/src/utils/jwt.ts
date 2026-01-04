@@ -7,9 +7,9 @@
 import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../types';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || '15m';
-const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRY || '30d';
+const JWT_SECRET: string = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const ACCESS_TOKEN_EXPIRY: string = process.env.JWT_ACCESS_EXPIRY || '15m';
+const REFRESH_TOKEN_EXPIRY: string = process.env.JWT_REFRESH_EXPIRY || '30d';
 
 /**
  * Generate access token (short-lived)
@@ -23,7 +23,7 @@ export function generateAccessToken(userId: number, email: string, username: str
   };
 
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRY as string,
+    expiresIn: ACCESS_TOKEN_EXPIRY,
     issuer: 'wordigo-api',
     audience: 'wordigo-app'
   });
@@ -43,7 +43,7 @@ export function generateRefreshToken(userId: number, email: string, username: st
   const expiry = rememberMe ? '90d' : REFRESH_TOKEN_EXPIRY;
 
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: expiry as string,
+    expiresIn: expiry,
     issuer: 'wordigo-api',
     audience: 'wordigo-app'
   });
