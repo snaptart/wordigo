@@ -4,7 +4,7 @@ databases:
     plan: free
 
 services:
-
+ 
   # Backend API Service
   - type: web
     name: wordigo-backend
