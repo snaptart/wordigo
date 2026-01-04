@@ -150,20 +150,20 @@ export async function getGameHistory(
     include: {
       correctSense: {
         include: {
-          word: true,
-          synset: true,
+          words: true,
+          synsets: true,
         },
       },
       falseSense: {
         include: {
-          word: true,
-          synset: true,
+          words: true,
+          synsets: true,
         },
       },
       selectedSense: {
         include: {
-          word: true,
-          synset: true,
+          words: true,
+          synsets: true,
         },
       },
     },
@@ -178,10 +178,10 @@ export async function getGameHistory(
     defOrder: record.defOrder,
     wordigoResult: record.wordigoResult,
     createTs: record.createTs,
-    word: record.correctSense.word.lemma,
-    definition: record.correctSense.synset.definition,
-    wordFalse: record.falseSense.word.lemma,
-    definitionFalse: record.falseSense.synset.definition,
+    word: record.correctSense.words.lemma,
+    definition: record.correctSense.synsets.definition,
+    wordFalse: record.falseSense.words.lemma,
+    definitionFalse: record.falseSense.synsets.definition,
   }));
 }
 
