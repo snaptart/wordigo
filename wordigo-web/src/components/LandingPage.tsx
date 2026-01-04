@@ -98,7 +98,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       <div className="landing-page">
         <div className="landing-content">
           <p className="error-text">{error || 'Failed to load word'}</p>
-          <button className="retry-button" onClick={fetchLandingWord}>
+          <button className="retry-button" onClick={() => fetchLandingWord()}>
             Try Again
           </button>
         </div>
