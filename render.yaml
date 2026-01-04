@@ -2,9 +2,7 @@ services:
   # PostgreSQL Database
   - type: pserv
     name: wordigo-db
-    env: docker
     plan: free
-    ipAllowList: []
 
   # Backend API Service
   - type: web
@@ -40,8 +38,6 @@ services:
   - type: web
     name: wordigo-frontend
     env: static
-    region: oregon
-    plan: free
     buildCommand: cd wordigo-web && npm install && npm run build
     staticPublishPath: wordigo-web/dist
     headers:
