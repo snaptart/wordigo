@@ -39,13 +39,9 @@
   color: var(--color-success-text);
 }
 
-/* Loading State */
-.loading-state {
-  text-align: center;
+/* Component-specific loading state override */
+.settings-content .loading-state {
   padding: var(--spacing-12);
-  font-family: var(--font-primary);
-  font-size: 1.1rem;
-  color: var(--color-text-secondary);
 }
 
 /* Settings Sections */

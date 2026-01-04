@@ -59,7 +59,7 @@
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-bold);
   margin: 0;
-  font-family: var(--font-primary);
+  font-family: var(--font-secondary);
   letter-spacing: var(--letter-spacing-wider);
   color: var(--color-text-black);
 }
@@ -79,23 +79,24 @@
 /* Game Modes Grid */
 .game-modes {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-6);
   width: 100%;
 }
 
 .game-mode-card {
-  aspect-ratio: 1;
   background-color: var(--color-white);
   border: var(--border-width-base) solid var(--color-border-light);
   border-radius: var(--radius-lg);
   cursor: pointer;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
   padding: var(--spacing-6);
   transition: all var(--transition-base);
   box-shadow: var(--shadow-base);
+  text-align: left;
+  min-height: 180px;
 }
 
 .game-mode-card:hover:not(:disabled) {
@@ -115,6 +116,69 @@
   opacity: 0.5;
 }
 
+/* Dictionary-style mode content */
+.mode-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.mode-content.dictionary-style {
+  display: block;
+  line-height: 1.6;
+}
+
+/* Mode name with syllables - sans-serif, bold */
+.mode-word {
+  font-family: var(--font-secondary);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-black);
+  margin-right: 0.5em;
+}
+
+/* IPA pronunciation - serif */
+.mode-pronunciation {
+  font-family: var(--font-definitions);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-right: 0.5em;
+}
+
+/* POS (part of speech) - serif, italic */
+.mode-pos {
+  font-family: var(--font-definitions);
+  font-style: italic;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-right: 0.5em;
+}
+
+/* Metadata in brackets - sans-serif, smaller and muted */
+.mode-metadata {
+  font-family: var(--font-definitions);
+  font-size: var(--font-size-sm);
+  /*text-transform: uppercase;*/
+  color: var(--color-text-tertiary);
+  margin-right: 0.5em;
+  display: block;
+  margin-top: 0.25em;
+}
+
+/* Mode definition - serif */
+.mode-definition {
+  font-family: var(--font-definitions);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  display: block;
+  margin-top: 0.5em;
+  line-height: 1.5;
+}
+
+/* Legacy mode title (fallback) */
 .mode-title {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
@@ -131,8 +195,9 @@
   border-radius: var(--radius-lg);
   cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
   transition: all var(--transition-base);
   box-shadow: var(--shadow-base);
 }
@@ -183,6 +248,33 @@
   .start-screen-content {
     padding: var(--spacing-8) var(--spacing-4);
     gap: var(--spacing-8);
+  }
+
+  /* Dictionary-style mode adjustments for mobile */
+  .mode-word {
+    font-size: var(--font-size-xl);
+  }
+
+  .mode-pronunciation,
+  .mode-pos {
+    font-size: var(--font-size-base);
+  }
+
+  .mode-metadata {
+    font-size: var(--font-size-xs);
+  }
+
+  .mode-definition {
+    font-size: var(--font-size-sm);
+  }
+
+  .game-mode-card {
+    min-height: 150px;
+    padding: var(--spacing-4);
+  }
+
+  .daily-challenge {
+    padding: var(--spacing-6);
   }
 }
 

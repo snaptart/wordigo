@@ -207,7 +207,7 @@ function GameHistory({ onBack, onMenuClick, userId }: GameHistoryProps) {
                                 <div className="definition-label">
                                   <strong>Correct Definition:</strong>
                                 </div>
-                                <div className="definition-text">
+                                <div className="game-history-definition">
                                   {word.correctWord.definition}
                                 </div>
                               </div>
@@ -217,7 +217,7 @@ function GameHistory({ onBack, onMenuClick, userId }: GameHistoryProps) {
                                   <div className="definition-label">
                                     <strong>Your Selection (Wrong):</strong>
                                   </div>
-                                  <div className="definition-text wrong">
+                                  <div className="game-history-definition wrong">
                                     <strong>{word.userSelection.word}:</strong>{' '}
                                     {word.userSelection.definition}
                                   </div>
@@ -229,7 +229,7 @@ function GameHistory({ onBack, onMenuClick, userId }: GameHistoryProps) {
                                   <strong>Wrong Options Shown:</strong>
                                 </div>
                                 {word.wrongDefinitions.map((wrongDef, idx) => (
-                                  <div key={idx} className="definition-text">
+                                  <div key={idx} className="game-history-definition">
                                     <strong>{wrongDef.word}:</strong> {wrongDef.definition}
                                   </div>
                                 ))}

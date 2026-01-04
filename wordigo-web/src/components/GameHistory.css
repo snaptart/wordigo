@@ -18,51 +18,7 @@
   padding: var(--spacing-8);
 }
 
-/* Loading, Error, and Empty States */
-
-.loading-state,
-.error-state,
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px var(--spacing-5);
-  text-align: center;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: var(--border-width-extra-thick) solid var(--color-border-light);
-  border-top-color: var(--color-blue);
-  border-radius: var(--radius-full);
-  animation: spin 1s linear infinite;
-  margin-bottom: var(--spacing-4);
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.error-state p {
-  color: var(--color-error);
-  margin-bottom: var(--spacing-4);
-}
-
-.error-state button {
-  background-color: var(--color-blue);
-  color: var(--color-white);
-  border: none;
-  padding: 10px var(--spacing-6);
-  border-radius: var(--radius-base);
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-}
-
+/* Component-specific overrides for loading states */
 .empty-state p {
   color: var(--color-gray-500);
   font-size: var(--font-size-base);
@@ -110,12 +66,14 @@
 }
 
 .game-date {
+  font-family: var(--font-ui);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-gray-600);
 }
 
 .difficulty-badge {
+  font-family: var(--font-ui);
   padding: var(--spacing-1) var(--spacing-3);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-xs);
@@ -125,6 +83,7 @@
 }
 
 .status-badge {
+  font-family: var(--font-ui);
   padding: var(--spacing-1) var(--spacing-3);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-xs);
@@ -162,12 +121,14 @@
 }
 
 .stat-label {
+  font-family: var(--font-ui);
   font-size: var(--font-size-xs);
   color: var(--color-gray-500);
   font-weight: var(--font-weight-medium);
 }
 
 .stat-value {
+  font-family: var(--font-ui);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-dark);
@@ -194,6 +155,7 @@
 }
 
 .game-details h3 {
+  font-family: var(--font-ui);
   margin: 0 0 var(--spacing-4) 0;
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
@@ -218,7 +180,7 @@
 }
 
 .word-entry.incorrect {
-  border-left-color: #ef4444;
+  border-left-color: var(--color-error);
 }
 
 .word-header {
@@ -237,12 +199,14 @@
 }
 
 .word-number {
+  font-family: var(--font-ui);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-gray-500);
 }
 
 .word-text {
+  font-family: var(--font-primary);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-dark);
@@ -258,7 +222,7 @@
 }
 
 .result-icon.incorrect {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .word-meta {
@@ -269,18 +233,20 @@
 }
 
 .strategy-badge {
+  font-family: var(--font-ui);
   padding: var(--spacing-1) var(--spacing-2);
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  background-color: #e0e7ff;
+  background-color: var(--color-accent-blue-light);
   color: var(--color-indigo);
 }
 
 .difficulty-band {
+  font-family: var(--font-ui);
   padding: var(--spacing-1) var(--spacing-2);
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   background-color: #fef3c7;
   color: #92400e;
@@ -301,29 +267,32 @@
 }
 
 .definition-label {
-  font-size: 13px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-sm);
   color: var(--color-gray-600);
 }
 
-.definition-text {
+/* Game history specific: definition text in boxes */
+.game-history-definition {
+  font-family: var(--font-definitions);
   font-size: var(--font-size-sm);
   color: var(--color-text-dark);
   line-height: var(--line-height-normal);
   padding: var(--spacing-2) var(--spacing-3);
   background-color: var(--color-gray-100);
-  border-radius: 6px;
+  border-radius: var(--radius-base);
 }
 
-.definition-text.wrong {
+.game-history-definition.wrong {
   background-color: var(--color-error-light);
   color: var(--color-error-darker);
 }
 
-.wrong-definitions .definition-text {
+.wrong-definitions .game-history-definition {
   margin-bottom: var(--spacing-1);
 }
 
-.wrong-definitions .definition-text:last-child {
+.wrong-definitions .game-history-definition:last-child {
   margin-bottom: 0;
 }
 
@@ -340,27 +309,35 @@
 }
 
 .pagination button {
-  background-color: var(--color-blue);
+  font-family: var(--font-ui);
+  background-color: var(--color-primary);
   color: var(--color-white);
-  border: none;
-  padding: 10px var(--spacing-5);
+  border: var(--border-width-base) solid var(--color-primary);
+  padding: var(--button-padding-base);
   border-radius: var(--radius-base);
   cursor: pointer;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-base);
 }
 
 .pagination button:hover:not(:disabled) {
-  background-color: var(--color-blue-dark);
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button-hover);
 }
 
 .pagination button:disabled {
-  background-color: var(--color-border-medium);
+  background-color: var(--color-gray-400);
+  border-color: var(--color-gray-400);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .page-info {
+  font-family: var(--font-ui);
   font-size: var(--font-size-sm);
   color: var(--color-gray-500);
   font-weight: var(--font-weight-medium);

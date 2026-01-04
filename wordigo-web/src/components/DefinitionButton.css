@@ -2,12 +2,12 @@
   width: 100%;
   padding: var(--spacing-5);
   margin: var(--spacing-3) 0;
-  font-size: var(--font-size-lg);  /* 18px - Merriweather Regular */
-  font-family: var(--font-definitions);  /* Merriweather for definitions */
+  font-size: var(--font-size-lg);
+  font-family: var(--font-secondary); /* Sans-serif for definition text */
   font-weight: var(--font-weight-normal);
   text-align: left;
-  background-color: var(--color-white);
-  border: none;
+  background-color: transparent; /* No background by default */
+  border: none; /* No border by default */
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-base);
@@ -15,8 +15,6 @@
 }
 
 .definition-button:hover:not(.disabled) {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
   background-color: var(--color-bg-hover);
 }
 
@@ -27,13 +25,11 @@
 .definition-button.correct {
   background-color: var(--color-success-bg);
   color: var(--color-success-text-alt);
-  box-shadow: var(--shadow-success);
 }
 
 .definition-button.incorrect {
   background-color: #f8d7da;
   color: var(--color-error-text-dark);
-  box-shadow: var(--shadow-error);
 }
 
 .definition-button.disabled {
@@ -47,97 +43,53 @@
   gap: var(--spacing-2);
 }
 
-.strategy-label {
-  font-size: var(--font-size-xs);
+/* Dictionary-style layout */
+.definition-content.dictionary-style {
+  display: block;
+  line-height: 1.6;
+}
+
+/* Word with syllables - sans-serif, bold */
+.dict-word {
   font-family: var(--font-secondary);
-  font-weight: var(--font-weight-semibold);
-  color: #6c757d;
+  font-weight: var(--font-weight-bold);
+  color: inherit; /* Use button text color */
+  margin-right: 0.5em;
+}
+
+/* IPA - serif */
+.dict-ipa {
+  font-family: var(--font-definitions); /* Merriweather serif */
+  font-weight: var(--font-weight-normal);
+  color: inherit; /* Use button text color */
+  margin-right: 0.5em;
+}
+
+/* POS - sans-serif, italic */
+.dict-pos {
+  font-family: var(--font-definitions);
+  font-style: italic;
+  color: inherit; /* Use button text color */
+  margin-right: 0.5em;
+}
+
+/* Metadata in brackets - sans-serif, smaller and slightly muted */
+.dict-metadata {
+  font-family: var(--font-definitions);
+  font-size: var(--font-size-sm);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: var(--spacing-2);
-  padding: var(--spacing-1) var(--spacing-2);
-  background-color: rgba(0, 0, 0, 0.05);
-  border-radius: var(--radius-sm);
-  align-self: flex-start;
+  color: var(--color-text-tertiary);
+  margin-right: 0.5em;
+  white-space: nowrap;
 }
 
-.definition-button.correct .strategy-label {
-  color: #0a3d1a;
-  background-color: rgba(21, 87, 36, 0.15);
-}
-
-.definition-button.incorrect .strategy-label {
-  color: #5a0f15;
-  background-color: rgba(114, 28, 36, 0.15);
-}
-
-.testing-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-2);
-  margin-top: var(--spacing-2);
-}
-
-.word-label,
-.difficulty-label,
-.score-label,
-.obscure-label {
-  font-size: 11px;
-  font-family: var(--font-secondary);
-  font-weight: var(--font-weight-semibold);
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius-sm);
-  align-self: flex-start;
-}
-
-.word-label {
-  color: #059669;
-  background-color: rgba(5, 150, 105, 0.1);
-}
-
-.difficulty-label {
-  color: #0056b3;
-  background-color: rgba(0, 86, 179, 0.1);
-}
-
-.score-label {
-  color: var(--color-purple);
-  background-color: rgba(111, 66, 193, 0.1);
-}
-
-.obscure-label {
-  color: var(--color-orange);
-  background-color: rgba(217, 119, 6, 0.1);
-}
-
-.definition-button.correct .difficulty-label {
-  color: #004085;
-  background-color: rgba(0, 64, 133, 0.15);
-}
-
-.definition-button.correct .score-label {
-  color: #533d7d;
-  background-color: rgba(83, 61, 125, 0.15);
-}
-
-.definition-button.incorrect .difficulty-label {
-  color: #003d6b;
-  background-color: rgba(0, 61, 107, 0.15);
-}
-
-.definition-button.incorrect .score-label {
-  color: #4a2d6f;
-  background-color: rgba(74, 45, 111, 0.15);
-}
-
-.definition-button.correct .obscure-label {
-  color: #b45309;
-  background-color: rgba(180, 83, 9, 0.15);
-}
-
-.definition-button.incorrect .obscure-label {
-  color: #92400e;
-  background-color: rgba(146, 64, 14, 0.15);
+/* Definition text - sans-serif */
+.definition-text {
+  font-family: var(--font-definitions);
+  font-weight: var(--font-weight-normal);
+  /*color: inherit;  Use button text color */
+  display: block;
+  margin-top: 0.25em;
 }
 
 /* Mobile optimizations */
@@ -152,12 +104,8 @@
     gap: var(--spacing-1);
   }
 
-  .testing-info {
-    gap: var(--spacing-1);
-    margin-top: var(--spacing-1);
-  }
-
-  .strategy-label {
-    margin-top: var(--spacing-1);
+  .dict-metadata {
+    font-size: var(--font-size-xs);
+    white-space: normal;
   }
 }

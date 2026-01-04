@@ -78,10 +78,10 @@
   /* ==================== TYPOGRAPHY ==================== */
 
   /* Font Families */
-  --font-primary: 'Fraunces', serif;                    /* For words */
-  --font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  /* For definitions */
-  --font-ui: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;  /* For UI/buttons */
-  --font-definitions: 'Merriweather', Georgia, serif;   /* For dictionary definitions */
+  --font-primary: Georgia, 'Times New Roman', Times, serif;                    /* For words */
+  --font-secondary: Helvetica, Arial, sans-serif;  /* For definitions */
+  --font-ui: Helvetica, Arial, sans-serif;  /* For UI/buttons */
+  --font-definitions: Georgia, 'Times New Roman', Times, serif;   /* For dictionary definitions */
 
   /* Font Sizes */
   --font-size-xs: 0.75rem;      /* 12px */

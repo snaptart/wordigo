@@ -26,6 +26,7 @@ router.put('/auth/change-password', requireAuth, authController.changePassword);
 
 // Word routes
 router.get('/word', wordController.getWord);
+router.get('/landing-word', wordController.getLandingWord);
 router.get('/word-lookup/:word', wordLookupController.getWordLookup);
 
 // Game routes (legacy format)
