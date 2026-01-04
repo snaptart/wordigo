@@ -46,6 +46,7 @@ export interface PreloadedWord {
     overall_difficulty_score?: number | null;
     word_in_definition?: boolean | null;
     pos?: string;
+    posName?: string;
     pronunciation?: {
       ipa: string;
       syllables: string[];
@@ -62,6 +63,14 @@ export interface PreloadedWord {
     difficulty_band?: number | null;
     overall_difficulty_score?: number | null;
     word_in_definition?: boolean | null;
+    pos?: string;
+    posName?: string;
+    pronunciation?: {
+      ipa: string;
+      syllables: string[];
+      syllableCount: number;
+      formattedSyllables: string;
+    };
   }>;
   defOrder: number;
   timer: number;

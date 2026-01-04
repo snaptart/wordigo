@@ -69,7 +69,7 @@ const Menu: React.FC<MenuProps> = ({
         className={`menu-panel ${isAnimating ? 'is-open' : ''}`}
       >
         <div className="menu-header">
-          <h2 className="menu-title">Menu</h2>
+          <h2 className="menu-title">me·nu</h2>
           <button className="menu-close" onClick={onClose} aria-label="Close">
             ✕
           </button>
@@ -108,34 +108,34 @@ const Menu: React.FC<MenuProps> = ({
           <nav className="menu-nav">
             {user && onProfile && (
               <button className="menu-item" onClick={() => { onProfile(); onClose(); }}>
-                <span className="menu-item-text">Profile</span>
+                <span className="menu-item-text">pro·file</span>
               </button>
             )}
 
             {user && onHistory && (
               <button className="menu-item" onClick={() => { onHistory(); onClose(); }}>
-                <span className="menu-item-text">Game History</span>
+                <span className="menu-item-text">game his·to·ry</span>
               </button>
             )}
 
             {user && onWordLookup && (
               <button className="menu-item" onClick={() => { onWordLookup(); onClose(); }}>
-                <span className="menu-item-text">Word Lookup</span>
+                <span className="menu-item-text">word look·up</span>
               </button>
             )}
 
             {onSettings && (
               <button className="menu-item" onClick={() => { onSettings(); onClose(); }}>
-                <span className="menu-item-text">Settings</span>
+                <span className="menu-item-text">set·tings</span>
               </button>
             )}
 
             <button className="menu-item" onClick={() => { onHelp?.(); onClose(); }}>
-              <span className="menu-item-text">Help & Tutorial</span>
+              <span className="menu-item-text">help & tu·to·ri·al</span>
             </button>
 
             <button className="menu-item" onClick={() => { onAbout?.(); onClose(); }}>
-              <span className="menu-item-text">About Wordigo</span>
+              <span className="menu-item-text">a·bout de·find·able</span>
             </button>
           </nav>
 

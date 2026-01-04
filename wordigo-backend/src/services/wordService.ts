@@ -41,6 +41,7 @@ interface WordData {
   lexdomainid: number;
   lexdomainname: string;
   pos?: string; // Part of speech (n, v, a, r, s)
+  posName?: string; // Full POS name (noun, verb, adjective, adverb)
   // All difficulty fields now come from wordigo_difficulty_calculated
   word_in_definition?: boolean | null;
   def_num_chars?: number | null; // Mapped from def_char_count
@@ -60,6 +61,7 @@ interface GameWord {
     word: string;
     badDefinition: string;
     strategy: string;
+    pronunciation?: PronunciationData;
   }>;
   defOrder: number;
   timer: number;
@@ -110,6 +112,7 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
 
   // Get calculated difficulty data for this sense
   const calculatedDiff = selectedSense.wordigo_difficulty_calculated;
+  const correctPos = selectedSense.synsets.pos;
 
   // Build correct word object
   const correctWordData: WordData = {
@@ -122,7 +125,8 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
     senseid: selectedSense.senseid,
     lexdomainid: selectedSense.synsets.lexdomainid,
     lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
-    pos: selectedSense.synsets.pos,
+    pos: correctPos,
+    posName: getPosName(correctPos),
     word_in_definition: calculatedDiff?.word_in_definition ?? null,
     def_num_chars: calculatedDiff?.def_char_count ?? null,
     overall_difficulty_score: calculatedDiff?.overall_difficulty_score ? Number(calculatedDiff.overall_difficulty_score) : null,
@@ -141,14 +145,18 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
   const wrongDefResults = await getWrongDefinitions(correctWordData, correctWordData.difficulty_band);
 
   // If we don't have all 3 wrong definitions, fill with random fallbacks
-  const wrongWords: Array<WordData & { word: string; badDefinition: string; strategy: string }> = [];
+  const wrongWords: Array<WordData & { word: string; badDefinition: string; strategy: string; pronunciation?: PronunciationData }> = [];
 
   for (const wrongDef of wrongDefResults) {
+    const wrongWord = cleanWord(wrongDef.word);
+    const pronunciation = await fetchPronunciationData(wrongWord);
+
     wrongWords.push({
       ...wrongDef.word,
-      word: cleanWord(wrongDef.word),
+      word: wrongWord,
       badDefinition: cleanDefinition(wrongDef.word.definition),
       strategy: wrongDef.strategy,
+      pronunciation,
     });
   }
 
@@ -177,6 +185,7 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
 
     const sense = randomSenses[0];
     const fallbackCalcDiff = sense.wordigo_difficulty_calculated;
+    const fallbackPos = sense.synsets.pos;
 
     const wrongWordData: WordData = {
       wordid: sense.words.wordid,
@@ -188,17 +197,23 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
       senseid: sense.senseid,
       lexdomainid: sense.synsets.lexdomainid,
       lexdomainname: sense.synsets.lexdomains.lexdomainname,
+      pos: fallbackPos,
+      posName: getPosName(fallbackPos),
       word_in_definition: fallbackCalcDiff?.word_in_definition ?? null,
       def_num_chars: fallbackCalcDiff?.def_char_count ?? null,
       overall_difficulty_score: fallbackCalcDiff?.overall_difficulty_score ? Number(fallbackCalcDiff.overall_difficulty_score) : null,
       difficulty_band: fallbackCalcDiff?.difficulty_band ?? null,
     };
 
+    const fallbackWord = cleanWord(wrongWordData);
+    const fallbackPronunciation = await fetchPronunciationData(fallbackWord);
+
     wrongWords.push({
       ...wrongWordData,
-      word: cleanWord(wrongWordData),
+      word: fallbackWord,
       badDefinition: cleanDefinition(wrongWordData.definition),
       strategy: 'fallback_random',
+      pronunciation: fallbackPronunciation,
     });
 
     excludedSynsetIds.push(wrongWordData.synsetid);
@@ -239,6 +254,7 @@ interface SemanticRelationship {
   relationship_type: string;
   lexdomainid: number;
   lexdomainname: string;
+  pos: string;
   difficulty_band: number | null;
   def_char_count: number | null;
   casedwordid: number | null;
@@ -283,6 +299,7 @@ async function getSemanticRelatedWords(
       lt.link as relationship_type,
       ld.lexdomainid,
       ld.lexdomainname,
+      s2.pos,
       wdc.difficulty_band,
       wdc.def_char_count,
       sen2.casedwordid,
@@ -454,6 +471,8 @@ export async function getNearSynonymWord(
         senseid: selected.senseid,
         lexdomainid: selected.lexdomainid,
         lexdomainname: selected.lexdomainname,
+        pos: selected.pos,
+        posName: getPosName(selected.pos),
         word_in_definition: selected.word_in_definition,
         def_num_chars: selected.def_char_count,
         overall_difficulty_score: selected.overall_difficulty_score ? Number(selected.overall_difficulty_score) : null,
@@ -479,6 +498,8 @@ export async function getNearSynonymWord(
       senseid: selected.senseid,
       lexdomainid: selected.lexdomainid,
       lexdomainname: selected.lexdomainname,
+      pos: selected.pos,
+      posName: getPosName(selected.pos),
       word_in_definition: selected.word_in_definition,
       def_num_chars: selected.def_char_count,
       overall_difficulty_score: selected.overall_difficulty_score ? Number(selected.overall_difficulty_score) : null,
@@ -900,6 +921,8 @@ async function getWordFromSynset(
   // Get calculated difficulty from the included relation
   const calculatedDiff = randomSense.wordigo_difficulty_calculated;
 
+  const pos = randomSense.synsets.pos;
+
   return {
     wordid: randomSense.words.wordid,
     lemma: randomSense.words.lemma,
@@ -910,11 +933,28 @@ async function getWordFromSynset(
     senseid: randomSense.senseid,
     lexdomainid: randomSense.synsets.lexdomainid,
     lexdomainname: randomSense.synsets.lexdomains.lexdomainname,
+    pos: pos,
+    posName: getPosName(pos),
     word_in_definition: calculatedDiff?.word_in_definition ?? null,
     def_num_chars: calculatedDiff?.def_char_count ?? null,
     overall_difficulty_score: calculatedDiff?.overall_difficulty_score ? Number(calculatedDiff.overall_difficulty_score) : null,
     difficulty_band: calculatedDiff?.difficulty_band ?? null,
   };
+}
+
+/**
+ * Get full POS name from abbreviation
+ */
+function getPosName(pos?: string): string | undefined {
+  if (!pos) return undefined;
+  const posMap: Record<string, string> = {
+    'n': 'noun',
+    'v': 'verb',
+    'a': 'adjective',
+    'r': 'adverb',
+    's': 'adjective'
+  };
+  return posMap[pos] || pos;
 }
 
 /**

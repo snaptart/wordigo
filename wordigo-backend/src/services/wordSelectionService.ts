@@ -95,6 +95,21 @@ export async function getRandomWordWithPreferences(
 }
 
 /**
+ * Get full POS name from abbreviation
+ */
+function getPosName(pos?: string): string | undefined {
+  if (!pos) return undefined;
+  const posMap: Record<string, string> = {
+    'n': 'noun',
+    'v': 'verb',
+    'a': 'adjective',
+    'r': 'adverb',
+    's': 'adjective'
+  };
+  return posMap[pos] || pos;
+}
+
+/**
  * Return string as-is without capitalization
  */
 function capitalizeFirstLetter(str: string): string {
@@ -226,6 +241,7 @@ async function getFilteredRandomWord(
 
     // Build the GameWord from this sense
     const calculatedDiff = selectedSense.wordigo_difficulty_calculated;
+    const correctPos = selectedSense.synsets.pos;
 
     const correctWordData: WordData = {
       wordid: selectedSense.words.wordid,
@@ -237,7 +253,8 @@ async function getFilteredRandomWord(
       senseid: selectedSense.senseid,
       lexdomainid: selectedSense.synsets.lexdomainid,
       lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
-      pos: selectedSense.synsets.pos,
+      pos: correctPos,
+      posName: getPosName(correctPos),
       word_in_definition: calculatedDiff?.word_in_definition ?? null,
       def_num_chars: calculatedDiff?.def_char_count ?? null,
       overall_difficulty_score: calculatedDiff?.overall_difficulty_score ? Number(calculatedDiff.overall_difficulty_score) : null,
@@ -297,8 +314,8 @@ async function getWrongDefinitionsWithFilter(
   wordLengthFilter: WordLengthFilter = 'all',
   allowObscureWords: boolean = true,
   categoryPreferences?: string[]
-): Promise<Array<WordData & { word: string; badDefinition: string; strategy: string }>> {
-  const wrongWords: Array<WordData & { word: string; badDefinition: string; strategy: string }> = [];
+): Promise<Array<WordData & { word: string; badDefinition: string; strategy: string; pronunciation?: any }>> {
+  const wrongWords: Array<WordData & { word: string; badDefinition: string; strategy: string; pronunciation?: any }> = [];
   const excludedSynsetIds: number[] = [correctWordData.synsetid];
   const threshold = WORD_LENGTH_THRESHOLDS[wordLengthFilter];
 
@@ -331,11 +348,15 @@ async function getWrongDefinitionsWithFilter(
 
   // Convert results to the format expected by this service
   for (const wrongDef of wrongDefResults) {
+    const wrongWord = cleanWord(wrongDef.word);
+    const pronunciation = await fetchPronunciationData(wrongWord);
+
     wrongWords.push({
       ...wrongDef.word,
-      word: cleanWord(wrongDef.word),
+      word: wrongWord,
       badDefinition: capitalizeFirstLetter(wrongDef.word.definition),
-      strategy: wrongDef.strategy
+      strategy: wrongDef.strategy,
+      pronunciation,
     });
     excludedSynsetIds.push(wrongDef.word.synsetid);
   }

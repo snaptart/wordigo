@@ -79,3 +79,38 @@ export async function getWord(req: Request, res: Response) {
     });
   }
 }
+
+/**
+ * GET /api/landing-word
+ * Get a random word for the landing page (no history tracking)
+ * Returns word with 1 correct and 1 wrong definition
+ */
+export async function getLandingWord(_req: Request, res: Response) {
+  try {
+    // Get a random word with no difficulty filter
+    const gameWord = await getRandomWord();
+
+    // Build simple response - just the word data, no game tracking
+    const response = {
+      success: true,
+      data: {
+        word: gameWord.correctWord.word,
+        pos: gameWord.correctWord.pos,
+        posName: gameWord.correctWord.posName,
+        pronunciation: gameWord.correctWord.pronunciation,
+        correctDefinition: gameWord.correctWord.goodDefinition,
+        wrongDefinition: gameWord.wrongWords[0].badDefinition,
+        // Random order: 0 = correct first, 1 = wrong first
+        defOrder: Math.floor(Math.random() * 2)
+      },
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error in getLandingWord:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get landing word',
+    });
+  }
+}

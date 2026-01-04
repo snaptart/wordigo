@@ -1,0 +1,291 @@
+.landing-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 15vh;
+  padding-left: var(--spacing-8);
+  padding-right: var(--spacing-8);
+  padding-bottom: var(--spacing-8);
+}
+
+.landing-content {
+  max-width: var(--container-max-width-xl);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+/* Title */
+.landing-title {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  font-family: var(--font-secondary);
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-black);
+  text-align: center;
+}
+
+/* Word Display - matches WordDisplay.css */
+.landing-word-display {
+  text-align: center;
+  margin: var(--spacing-4) 0;
+}
+
+.word-headword-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.landing-word-display .word-text {
+  font-size: 2rem;
+  font-family: var(--font-secondary);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.word-pronunciation {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);
+  font-style: normal;
+  letter-spacing: 0.025em;
+  margin: 0;
+}
+
+.word-syllables {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+.word-pos {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-text-primary);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Definition Buttons - matches DefinitionButton.css */
+.landing-definitions {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-height: 200px; /* Reserve space to prevent layout shift */
+  position: relative;
+}
+
+.definitions-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.landing-definition-button {
+  width: 100%;
+  padding: var(--spacing-5);
+  margin: var(--spacing-3) 0;
+  font-size: var(--font-size-lg);
+  font-family: var(--font-secondary);
+  font-weight: var(--font-weight-normal);
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: none;
+  opacity: 0;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.landing-definition-button:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.landing-definition-button:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.landing-definition-button:hover:not(:disabled) {
+  background-color: var(--color-bg-hover);
+}
+
+.landing-definition-button.correct {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text-alt);
+}
+
+.landing-definition-button.incorrect {
+  background-color: #f8d7da;
+  color: var(--color-error-text-dark);
+}
+
+.landing-definition-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.definition-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.definition-text {
+  font-family: var(--font-definitions);
+  font-weight: var(--font-weight-normal);
+  display: block;
+  margin-top: 0.25em;
+}
+
+/* Loading and Error States */
+.loading-text,
+.error-text {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-family: var(--font-primary);
+}
+
+.error-text {
+  color: var(--color-error-text-dark);
+}
+
+.retry-button {
+  padding: var(--spacing-4) var(--spacing-6);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-secondary);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  background-color: var(--color-accent-blue);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-base);
+}
+
+.retry-button:hover {
+  background-color: var(--color-accent-blue-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.retry-button:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Next Word Button */
+.next-word-button {
+  padding: 8px 16px;
+  margin-top: var(--spacing-6);
+  font-size: var(--font-size-lg);
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  text-transform: lowercase;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.next-word-button:hover {
+  color: var(--color-text-primary);
+}
+
+.next-word-button:active {
+  color: var(--color-accent-blue);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .landing-page {
+    padding-top: 12vh;
+    padding-left: var(--spacing-4);
+    padding-right: var(--spacing-4);
+    padding-bottom: var(--spacing-4);
+  }
+
+  .landing-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .landing-word-display .word-text {
+    font-size: 28px;
+    letter-spacing: 0.5px;
+  }
+
+  .word-pronunciation {
+    font-size: 1.125rem;
+  }
+
+  .word-syllables {
+    font-size: 0.95rem;
+  }
+
+  .word-pos {
+    font-size: 1rem;
+  }
+
+  .landing-definition-button {
+    padding: var(--spacing-3);
+    margin: var(--spacing-2) 0;
+    font-size: var(--font-size-base);
+  }
+
+  .definition-content {
+    gap: var(--spacing-1);
+  }
+
+  .next-word-button {
+    padding: 6px 12px;
+    font-size: var(--font-size-base);
+    margin-top: var(--spacing-4);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .landing-title {
+    font-size: 2.25rem;
+  }
+}
