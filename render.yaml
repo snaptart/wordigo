@@ -1,8 +1,9 @@
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: wordigo-db
+databases:
+  - name: wordigo-db
+    databaseName: wordigo
     plan: free
+
+services:
 
   # Backend API Service
   - type: web
