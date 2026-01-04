@@ -34,14 +34,14 @@ function App() {
   // Auth state
   const [authState, setAuthState] = useState<AuthState>('login');
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [, setAccessToken] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
 
   // Game state
   const [gameState, setGameState] = useState<GameState>('start');
   const [gameMode, setGameMode] = useState<GameMode>(null);
   const [gameId, setGameId] = useState<number | null>(null);
-  const [difficulty, setDifficulty] = useState<string>('');
+  const [, setDifficulty] = useState<string>('');
   const [totalWords, setTotalWords] = useState<number>(0);
   const [timeLimit, setTimeLimit] = useState<number>(0);
   const [timerEnabled, setTimerEnabled] = useState<boolean>(true);
