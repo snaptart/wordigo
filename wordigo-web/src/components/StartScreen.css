@@ -1,9 +1,22 @@
 .start-screen {
   width: 100%;
   min-height: 100vh;
-  background-color: var(--color-bg-main);
+  /* Paper-like background */
+  background-color: #fcfbf9;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Header */
@@ -12,7 +25,10 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-4) var(--spacing-6);
-  background-color: var(--color-white);
+  /* Paper-like background */
+  background-color: #fcfbf9;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
   border-bottom: var(--border-width-base) solid var(--color-border-light);
   position: relative;
 }
@@ -62,6 +78,11 @@
   font-family: var(--font-secondary);
   letter-spacing: var(--letter-spacing-wider);
   color: var(--color-text-black);
+  /* Ink effect */
+  filter: contrast(0.95) brightness(1.05);
+  text-shadow:
+    0.6px 0.6px 0.6px rgba(0, 0, 0, 0.15),
+    -0.6px -0.6px 0.6px rgba(0, 0, 0, 0.08);
 }
 
 /* Main Content */
@@ -70,6 +91,7 @@
   padding: var(--spacing-12) var(--spacing-8);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--spacing-8);
   max-width: var(--container-max-width-xl);
   margin: 0 auto;
@@ -79,14 +101,15 @@
 /* Game Modes Grid */
 .game-modes {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-6);
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
   width: 100%;
+  max-width: 550px;
 }
 
 .game-mode-card {
-  background-color: var(--color-white);
-  border: var(--border-width-base) solid var(--color-border-light);
+  background-color: transparent;
+  border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
   display: flex;
@@ -94,7 +117,7 @@
   justify-content: flex-start;
   padding: var(--spacing-6);
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-base);
+  box-shadow: none;
   text-align: left;
   min-height: 180px;
 }
@@ -102,8 +125,6 @@
 .game-mode-card:hover:not(:disabled) {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--color-border-medium);
-  background: var(--color-bg-hover);
 }
 
 .game-mode-card:active:not(:disabled) {
@@ -136,6 +157,11 @@
   font-size: var(--font-size-2xl);
   color: var(--color-text-black);
   margin-right: 0.5em;
+  /* Ink effect */
+  filter: contrast(0.95) brightness(1.05);
+  text-shadow:
+    0.6px 0.6px 0.6px rgba(0, 0, 0, 0.15),
+    -0.6px -0.6px 0.6px rgba(0, 0, 0, 0.08);
 }
 
 /* IPA pronunciation - serif */
@@ -189,9 +215,10 @@
 /* Daily Challenge */
 .daily-challenge {
   width: 100%;
-  padding: var(--spacing-8);
-  background-color: var(--color-white);
-  border: var(--border-width-base) solid var(--color-border-light);
+  max-width: 550px;
+  padding: var(--spacing-6);
+  background-color: transparent;
+  border: none;
   border-radius: var(--radius-lg);
   cursor: pointer;
   display: flex;
@@ -199,14 +226,13 @@
   justify-content: flex-start;
   text-align: left;
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-base);
+  box-shadow: none;
+  min-height: 180px;
 }
 
 .daily-challenge:hover:not(:disabled) {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--color-border-medium);
-  background: var(--color-bg-hover);
 }
 
 .daily-challenge:active:not(:disabled) {
@@ -268,21 +294,14 @@
     font-size: var(--font-size-sm);
   }
 
-  .game-mode-card {
+  .game-mode-card,
+  .daily-challenge {
     min-height: 150px;
     padding: var(--spacing-4);
-  }
-
-  .daily-challenge {
-    padding: var(--spacing-6);
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  .game-modes {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .app-title {
     font-size: 2.25rem;
   }

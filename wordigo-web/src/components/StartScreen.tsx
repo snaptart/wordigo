@@ -29,6 +29,19 @@ const StartScreen: React.FC<StartScreenProps> = ({
       </header>
 
       <main className="start-screen-content">
+        <button
+          className="daily-challenge daily-challenge-disabled"
+          disabled
+        >
+          <div className="mode-content dictionary-style">
+            <span className="mode-word">dai·ly chal·lenge</span>
+            <span className="mode-pronunciation">/ ˈdeɪli ˈtʃælɪndʒ /</span>
+            <span className="mode-pos">noun phrase</span>
+            <span className="mode-metadata">[MODE - Timed; DURATION - 2 minutes, COMPETITION - The entire planet]</span>
+            <span className="mode-definition">: a unique game refreshed every day; compete with players worldwide for the best score</span>
+          </div>
+        </button>
+
         <div className="game-modes">
           <button
             className="game-mode-card"
@@ -56,19 +69,6 @@ const StartScreen: React.FC<StartScreenProps> = ({
             </div>
           </button>
         </div>
-
-        <button
-          className="daily-challenge daily-challenge-disabled"
-          disabled
-        >
-          <div className="mode-content dictionary-style">
-            <span className="mode-word">dai·ly chal·lenge</span>
-            <span className="mode-pronunciation">/ ˈdeɪli ˈtʃælɪndʒ /</span>
-            <span className="mode-pos">noun phrase</span>
-            <span className="mode-metadata">[MODE - Timed; DURATION - 2 minutes, COMPETITION - The entire planet]</span>
-            <span className="mode-definition">: a unique game refreshed every day; compete with players worldwide for the best score</span>
-          </div>
-        </button>
       </main>
     </div>
   );

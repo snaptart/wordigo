@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 import type { CompleteGameResponse } from './types/index';
 import { useAuth } from './hooks/useAuth';
@@ -36,23 +36,49 @@ function App() {
   const [finalStrikes, setFinalStrikes] = useState(0);
   const [timerEnabled, setTimerEnabled] = useState(true);
 
+  // Track navigation history
+  useEffect(() => {
+    // Push initial state
+    if (!window.history.state) {
+      window.history.replaceState({ gameState: 'start', showLanding }, '', window.location.href);
+    }
+
+    // Handle browser back/forward buttons
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state) {
+        setGameState(event.state.gameState || 'start');
+        setShowLanding(event.state.showLanding || false);
+        setShowMenu(false); // Close menu on navigation
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update browser history when game state changes
+  const updateGameState = (newState: GameState) => {
+    setGameState(newState);
+    window.history.pushState({ gameState: newState, showLanding: false }, '', window.location.href);
+  };
+
   // Handle mode selection from start screen
   const handleSelectMode = async (mode: GameMode) => {
     setGameMode(mode);
 
     if (mode === 'endless') {
       // Start game immediately for endless mode
-      setGameState('playing');
+      updateGameState('playing');
     } else {
       // For other modes, go to difficulty selection
-      setGameState('difficulty-selection');
+      updateGameState('difficulty-selection');
     }
   };
 
   // Handle difficulty selection (for non-endless modes)
   const handleSelectDifficulty = async (_selectedDifficulty: string, useTimer: boolean) => {
     setTimerEnabled(useTimer);
-    setGameState('playing');
+    updateGameState('playing');
     // Note: difficulty is passed to GameScreen via gameMode
   };
 
@@ -64,12 +90,12 @@ function App() {
   // Handle game completion
   const handleGameComplete = (results: CompleteGameResponse) => {
     setGameResults(results);
-    setGameState('results');
+    updateGameState('results');
   };
 
   // Reset game to start screen
   const resetGame = () => {
-    setGameState('start');
+    updateGameState('start');
     setGameMode(null);
     setGameResults(null);
     setFinalStrikes(0);
@@ -87,6 +113,7 @@ function App() {
   if (showLanding) {
     return <LandingPage onStart={() => {
       setShowLanding(false);
+      window.history.pushState({ gameState: 'start', showLanding: false }, '', window.location.href);
       // Automatically continue as guest after landing page
       auth.handleContinueAsGuest();
     }} />;
@@ -127,10 +154,10 @@ function App() {
           onClose={() => setShowMenu(false)}
           user={auth.user}
           isGuest={auth.isGuest}
-          onProfile={() => setGameState('profile')}
-          onSettings={() => setGameState('settings')}
-          onHistory={() => setGameState('history')}
-          onWordLookup={() => setGameState('word-lookup')}
+          onProfile={() => updateGameState('profile')}
+          onSettings={() => updateGameState('settings')}
+          onHistory={() => updateGameState('history')}
+          onWordLookup={() => updateGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={auth.switchToLogin}
         />
@@ -156,10 +183,10 @@ function App() {
         useTimer={timerEnabled}
         onGameComplete={handleGameComplete}
         onExit={resetGame}
-        onProfile={() => setGameState('profile')}
-        onSettings={() => setGameState('settings')}
-        onHistory={() => setGameState('history')}
-        onWordLookup={() => setGameState('word-lookup')}
+        onProfile={() => updateGameState('profile')}
+        onSettings={() => updateGameState('settings')}
+        onHistory={() => updateGameState('history')}
+        onWordLookup={() => updateGameState('word-lookup')}
         onLogout={handleLogout}
         onLogin={auth.switchToLogin}
       />
@@ -191,7 +218,7 @@ function App() {
     return (
       <div className="app">
         <GameHistory
-          onBack={() => setGameState('start')}
+          onBack={() => window.history.back()}
           onMenuClick={handleMenuClick}
           userId={auth.user?.id}
         />
@@ -202,10 +229,10 @@ function App() {
           onClose={() => setShowMenu(false)}
           user={auth.user}
           isGuest={auth.isGuest}
-          onProfile={() => setGameState('profile')}
-          onSettings={() => setGameState('settings')}
-          onHistory={() => setGameState('history')}
-          onWordLookup={() => setGameState('word-lookup')}
+          onProfile={() => updateGameState('profile')}
+          onSettings={() => updateGameState('settings')}
+          onHistory={() => updateGameState('history')}
+          onWordLookup={() => updateGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={auth.switchToLogin}
         />
@@ -217,7 +244,7 @@ function App() {
     return (
       <div className="app">
         <WordLookup
-          onBack={() => setGameState('start')}
+          onBack={() => window.history.back()}
           onMenuClick={handleMenuClick}
           userId={auth.user?.id}
         />
@@ -228,10 +255,10 @@ function App() {
           onClose={() => setShowMenu(false)}
           user={auth.user}
           isGuest={auth.isGuest}
-          onProfile={() => setGameState('profile')}
-          onSettings={() => setGameState('settings')}
-          onHistory={() => setGameState('history')}
-          onWordLookup={() => setGameState('word-lookup')}
+          onProfile={() => updateGameState('profile')}
+          onSettings={() => updateGameState('settings')}
+          onHistory={() => updateGameState('history')}
+          onWordLookup={() => updateGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={auth.switchToLogin}
         />
@@ -244,7 +271,7 @@ function App() {
       <div className="app">
         <Profile
           user={auth.user}
-          onBack={() => setGameState('start')}
+          onBack={() => window.history.back()}
           onMenuClick={handleMenuClick}
           onLogout={handleLogout}
           onUpdateProfile={auth.handleUpdateProfile}
@@ -256,10 +283,10 @@ function App() {
           onClose={() => setShowMenu(false)}
           user={auth.user}
           isGuest={auth.isGuest}
-          onProfile={() => setGameState('profile')}
-          onSettings={() => setGameState('settings')}
-          onHistory={() => setGameState('history')}
-          onWordLookup={() => setGameState('word-lookup')}
+          onProfile={() => updateGameState('profile')}
+          onSettings={() => updateGameState('settings')}
+          onHistory={() => updateGameState('history')}
+          onWordLookup={() => updateGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={auth.switchToLogin}
         />
@@ -272,7 +299,7 @@ function App() {
       <div className="app">
         <Settings
           user={auth.user}
-          onBack={() => setGameState('start')}
+          onBack={() => window.history.back()}
           onMenuClick={handleMenuClick}
         />
 
@@ -282,10 +309,10 @@ function App() {
           onClose={() => setShowMenu(false)}
           user={auth.user}
           isGuest={auth.isGuest}
-          onProfile={() => setGameState('profile')}
-          onSettings={() => setGameState('settings')}
-          onHistory={() => setGameState('history')}
-          onWordLookup={() => setGameState('word-lookup')}
+          onProfile={() => updateGameState('profile')}
+          onSettings={() => updateGameState('settings')}
+          onHistory={() => updateGameState('history')}
+          onWordLookup={() => updateGameState('word-lookup')}
           onLogout={handleLogout}
           onLogin={auth.switchToLogin}
         />

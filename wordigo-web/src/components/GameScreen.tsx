@@ -119,6 +119,8 @@ function GameScreen({
       return;
     }
 
+    // Reset metadata visibility when moving to next word
+    setShowMetadata(false);
     handleNextWord();
   };
 
@@ -151,7 +153,7 @@ function GameScreen({
     <div className="app">
       <div className="game-container">
         <div key={currentWordIndex}>
-          <button className="back-button" onClick={onExit}>
+          <button className="exit-button" onClick={onExit}>
             ×
           </button>
 
