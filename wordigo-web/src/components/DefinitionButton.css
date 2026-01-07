@@ -12,24 +12,49 @@
   cursor: pointer;
   transition: all var(--transition-base);
   box-shadow: none;
+  opacity: 0;
+  animation: fadeIn 0.4s ease-out forwards;
+  color: #333 !important; /* Force black text on iOS */
+  -webkit-tap-highlight-color: transparent; /* Remove iOS tap highlight */
+  -webkit-text-fill-color: #333; /* Force text color on iOS Safari */
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.definition-button * {
+  color: inherit !important; /* Force all child elements to inherit */
+  -webkit-text-fill-color: inherit; /* Force text color on iOS Safari */
 }
 
 .definition-button:hover:not(.disabled) {
-  background-color: var(--color-bg-hover);
-}
-
-.definition-button.selected {
-  background-color: var(--color-accent-blue-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .definition-button.correct {
   background-color: var(--color-success-bg);
-  color: var(--color-success-text-alt);
+  color: var(--color-success-text-alt) !important;
+  -webkit-text-fill-color: var(--color-success-text-alt);
+}
+
+.definition-button.correct * {
+  color: var(--color-success-text-alt) !important;
+  -webkit-text-fill-color: var(--color-success-text-alt);
 }
 
 .definition-button.incorrect {
   background-color: #f8d7da;
-  color: var(--color-error-text-dark);
+  color: var(--color-error-text-dark) !important;
+  -webkit-text-fill-color: var(--color-error-text-dark);
+}
+
+.definition-button.incorrect * {
+  color: var(--color-error-text-dark) !important;
+  -webkit-text-fill-color: var(--color-error-text-dark);
 }
 
 .definition-button.disabled {
@@ -87,7 +112,7 @@
 .definition-text {
   font-family: var(--font-definitions);
   font-weight: var(--font-weight-normal);
-  /*color: inherit;  Use button text color */
+  color: inherit; /* Use button text color */
   display: block;
   margin-top: 0.25em;
 }

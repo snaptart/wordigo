@@ -24,8 +24,9 @@ export default function StrikeCounter({ strikes, currentWord, totalWords, showMe
         <button
           onClick={onToggleMetadata}
           className={`metadata-toggle-button ${showMetadata ? 'active' : ''}`}
+          disabled={showMetadata}
         >
-          {showMetadata ? 'hide metadata' : 'show metadata'}
+          {showMetadata ? 'no points' : 'show answer'}
         </button>
       )}
       <div className="strike-section">

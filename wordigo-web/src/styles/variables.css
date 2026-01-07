@@ -78,10 +78,10 @@
   /* ==================== TYPOGRAPHY ==================== */
 
   /* Font Families */
-  --font-primary: Georgia, 'Times New Roman', Times, serif;                    /* For words */
-  --font-secondary: Helvetica, Arial, sans-serif;  /* For definitions */
-  --font-ui: Helvetica, Arial, sans-serif;  /* For UI/buttons */
-  --font-definitions: Georgia, 'Times New Roman', Times, serif;   /* For dictionary definitions */
+  --font-primary: 'Averia Serif Libre', Georgia, 'Times New Roman', Times, serif;                    /* For words */
+  --font-secondary: 'Inter', Helvetica, Arial, sans-serif;  /* For definitions */
+  --font-ui: 'Inter', Helvetica, Arial, sans-serif;  /* For UI/buttons */
+  --font-definitions: 'Averia Serif Libre', Georgia, 'Times New Roman', Times, serif;   /* For dictionary definitions */
 
   /* Font Sizes */
   --font-size-xs: 0.75rem;      /* 12px */

@@ -17,6 +17,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const [loading, setLoading] = useState(true);
   const [loadingDefinition, setLoadingDefinition] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFadingOut, setIsFadingOut] = useState(false);
 
   // Hardcoded data for "definable"
   const DEFINABLE_WORD = {
@@ -70,8 +71,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     const isCorrect = wordData && index === wordData.defOrder;
     if (isCorrect) {
       setTimeout(() => {
+        setIsFadingOut(true);
+      }, 1200); // Start fade out after 1.2s
+
+      setTimeout(() => {
         onStart();
-      }, 1500);
+      }, 1500); // Navigate after 1.5s total
     }
     // If incorrect, show "next word" button (no auto-navigation)
   };
@@ -112,7 +117,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     : [wordData.wrongDefinition, DEFINABLE_WORD.correctDefinition];
 
   return (
-    <div className="landing-page">
+    <div className={`landing-page ${isFadingOut ? 'fade-out' : ''}`}>
+      {/* Dictionary Tab */}
+      <div className="dictionary-tab">
+        <img src="/src/assets/EF-Tab.png" alt="Dictionary tab" />
+      </div>
       <div className="landing-content">
         {/* Word Display */}
         <div className="landing-word-display">
@@ -152,12 +161,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           )}
         </div>
 
-        {/* Next Word Button - only show if wrong answer was selected */}
-        {showFeedback && selectedIndex !== null && selectedIndex !== wordData.defOrder && (
+        {/* Next Word Button or Prompt - show prompt initially, button after wrong answer */}
+        {!showFeedback ? (
+          <p className="choose-prompt">(choose a definition!)</p>
+        ) : showFeedback && selectedIndex !== null && selectedIndex !== wordData.defOrder ? (
           <button className="next-word-button" onClick={handleNextWord}>
             next word →
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );

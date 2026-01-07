@@ -18,7 +18,7 @@ const PORT = parseInt(process.env.PORT || '3000', 10);
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL || 'https://wordigo-frontend.onrender.com'
     : true, // Allow all origins in development
   credentials: true,
 }));
