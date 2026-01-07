@@ -61,6 +61,7 @@ function GameScreen({
   const [showMetadata, setShowMetadata] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(useTimer);
   const [initialTimeLimit, setInitialTimeLimit] = useState(180);
+  const [winnowedIndices, setWinnowedIndices] = useState<number[]>([]);
 
   const handleTimeout = async () => {
     if (engine) {
@@ -91,6 +92,9 @@ function GameScreen({
 
     await handleSelectDefinition(senseId, timer.timeRemaining);
 
+    // Reset winnowed definitions when answer is selected
+    setWinnowedIndices([]);
+
     // Check if game ended
     if (engine.state.isComplete && engine.state.gameResults) {
       timer.stop();
@@ -119,8 +123,9 @@ function GameScreen({
       return;
     }
 
-    // Reset metadata visibility when moving to next word
+    // Reset metadata visibility and winnowed definitions when moving to next word
     setShowMetadata(false);
+    setWinnowedIndices([]);
     handleNextWord();
   };
 
@@ -148,6 +153,42 @@ function GameScreen({
       </div>
     );
   }
+
+  // Handle winnow - remove a random wrong definition
+  const handleWinnow = () => {
+    if (!currentWord || winnowedIndices.length >= 3) return;
+
+    // Create array of all 4 definitions
+    const definitions = [
+      { isCorrect: true, index: 0 },
+      ...currentWord.wrongWords.map((_, i) => ({ isCorrect: false, index: i + 1 })),
+    ];
+
+    // Shuffle based on defOrder to match displayed order
+    const shuffled = [...definitions];
+    const correctDef = shuffled.shift()!;
+    shuffled.splice(currentWord.defOrder, 0, correctDef);
+
+    // Find indices of wrong definitions that haven't been winnowed
+    const availableWrongIndices = shuffled
+      .map((def, index) => ({ ...def, displayIndex: index }))
+      .filter(def => !def.isCorrect && !winnowedIndices.includes(def.displayIndex))
+      .map(def => def.displayIndex);
+
+    if (availableWrongIndices.length === 0) return;
+
+    // Pick a random wrong definition to winnow
+    const randomIndex = Math.floor(Math.random() * availableWrongIndices.length);
+    const indexToWinnow = availableWrongIndices[randomIndex];
+
+    setWinnowedIndices([...winnowedIndices, indexToWinnow]);
+  };
+
+  const handleToggleMetadata = () => {
+    // Reset winnowed definitions when divulge is clicked
+    setWinnowedIndices([]);
+    setShowMetadata(!showMetadata);
+  };
 
   return (
     <div className="app">
@@ -223,6 +264,7 @@ function GameScreen({
                   posName={def.posName}
                   ipa={def.ipa}
                   showMetadata={showMetadata}
+                  isWinnowed={winnowedIndices.includes(index)}
                 />
               ));
             })()}
@@ -253,7 +295,9 @@ function GameScreen({
         currentWord={currentWordIndex + 1}
         totalWords={mode === 'endless' ? undefined : totalWords}
         showMetadata={showMetadata}
-        onToggleMetadata={() => setShowMetadata(!showMetadata)}
+        onToggleMetadata={handleToggleMetadata}
+        onWinnow={handleWinnow}
+        winnowDisabled={winnowedIndices.length >= 3 || showResult}
       />
 
       {/* Global Menu Overlay */}

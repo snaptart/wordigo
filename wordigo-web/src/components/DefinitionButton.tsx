@@ -25,6 +25,7 @@ interface DefinitionButtonProps {
   posName?: string;
   ipa?: string;
   showMetadata?: boolean;
+  isWinnowed?: boolean;
 }
 
 export default function DefinitionButton({
@@ -43,6 +44,7 @@ export default function DefinitionButton({
   posName,
   ipa,
   showMetadata = true,
+  isWinnowed = false,
 }: DefinitionButtonProps) {
   const getClassName = () => {
     let className = 'definition-button';
@@ -50,6 +52,7 @@ export default function DefinitionButton({
     if (isIncorrect) className += ' incorrect';
     if (isSelected && !isCorrect && !isIncorrect) className += ' selected';
     if (disabled) className += ' disabled';
+    if (isWinnowed) className += ' winnowed';
     return className;
   };
 

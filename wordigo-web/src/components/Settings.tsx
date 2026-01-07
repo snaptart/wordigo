@@ -180,9 +180,9 @@ const Settings: React.FC<SettingsProps> = ({ user, onBack, onMenuClick }) => {
                 <label className="form-label">Word Length Filter</label>
                 <div className="radio-group-inline">
                   {[
-                    { value: 'short', label: 'Short', desc: '≤6 letters' },
-                    { value: 'medium', label: 'Medium', desc: '7-12 letters' },
-                    { value: 'long', label: 'Long', desc: '≥13 letters' },
+                    { value: 'short', label: 'Short', desc: 'Up to 7 letters' },
+                    { value: 'medium', label: 'Medium', desc: 'Up to 14 letters' },
+                    { value: 'long', label: 'Long', desc: 'Up to 42 letters' },
                     { value: 'all', label: 'All Lengths', desc: 'No filter' }
                   ].map(option => (
                     <label key={option.value} className="radio-option-inline">

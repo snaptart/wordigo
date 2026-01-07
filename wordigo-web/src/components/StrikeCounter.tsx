@@ -7,9 +7,11 @@ interface StrikeCounterProps {
   timeRemaining?: number;
   showMetadata?: boolean;
   onToggleMetadata?: () => void;
+  onWinnow?: () => void;
+  winnowDisabled?: boolean;
 }
 
-export default function StrikeCounter({ strikes, currentWord, totalWords, showMetadata, onToggleMetadata }: StrikeCounterProps) {
+export default function StrikeCounter({ strikes, currentWord, totalWords, showMetadata, onToggleMetadata, onWinnow, winnowDisabled }: StrikeCounterProps) {
   return (
     <div className="strike-counter">
       {currentWord !== undefined && (
@@ -20,15 +22,26 @@ export default function StrikeCounter({ strikes, currentWord, totalWords, showMe
           }
         </div>
       )}
-      {onToggleMetadata && (
-        <button
-          onClick={onToggleMetadata}
-          className={`metadata-toggle-button ${showMetadata ? 'active' : ''}`}
-          disabled={showMetadata}
-        >
-          {showMetadata ? 'no points' : 'show answer'}
-        </button>
-      )}
+      <div className="button-group">
+        {onToggleMetadata && (
+          <button
+            onClick={onToggleMetadata}
+            className={`metadata-toggle-button ${showMetadata ? 'active' : ''}`}
+            disabled={showMetadata}
+          >
+            {showMetadata ? 'ineligible' : 'divulge'}
+          </button>
+        )}
+        {onWinnow && (
+          <button
+            className="winnow-button"
+            onClick={onWinnow}
+            disabled={winnowDisabled}
+          >
+            winnow
+          </button>
+        )}
+      </div>
       <div className="strike-section">
         <div className="strike-dots">
           {[0, 1, 2].map((index) => (
