@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { WordSelectionOptions, WordLengthFilter } from '../types';
 import { getUserPreferences, getAdaptiveDifficultyBand } from './userPreferencesService';
 import categoryGroupService from './categoryGroupService';
-import { GameWord, WordData, getRandomWord as getBasicRandomWord, fetchPronunciationData } from './wordService';
+import { GameWord, WordData, getRandomWord as getBasicRandomWord, fetchPronunciationData, getSimpleCategoryDisplayName } from './wordService';
 import { getWrongDefinitions } from './wrongDefinitionService';
 import { getLinguistWrongDefinitions } from './linguistWrongDefinitionService';
 
@@ -253,6 +253,9 @@ async function getFilteredRandomWord(
     const calculatedDiff = selectedSense.wordigo_difficulty_calculated;
     const correctPos = selectedSense.synsets.pos;
 
+    // Get simple category display name
+    const simpleCategory = await getSimpleCategoryDisplayName(calculatedDiff?.lexdomain_category);
+
     const correctWordData: WordData = {
       wordid: selectedSense.words.wordid,
       lemma: selectedSense.words.lemma,
@@ -263,6 +266,7 @@ async function getFilteredRandomWord(
       senseid: selectedSense.senseid,
       lexdomainid: selectedSense.synsets.lexdomainid,
       lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
+      simpleCategory,
       pos: correctPos,
       posName: getPosName(correctPos),
       word_in_definition: calculatedDiff?.word_in_definition ?? null,

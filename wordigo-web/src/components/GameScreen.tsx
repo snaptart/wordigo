@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useGameEngine, type GameMode } from '../hooks/useGameEngine';
 import { useTimer as useGameTimer } from '../hooks/useTimer';
 import type { CompleteGameResponse } from '../types/index';
@@ -62,6 +62,7 @@ function GameScreen({
   const [timerEnabled, setTimerEnabled] = useState(useTimer);
   const [initialTimeLimit, setInitialTimeLimit] = useState(180);
   const [winnowedIndices, setWinnowedIndices] = useState<number[]>([]);
+  const hasStartedGame = useRef(false);
 
   const handleTimeout = async () => {
     if (engine) {
@@ -75,6 +76,9 @@ function GameScreen({
 
   // Start the game when component mounts
   useEffect(() => {
+    if (hasStartedGame.current) return;
+    hasStartedGame.current = true;
+
     startGame(mode, userId, difficulty, useTimer).then(() => {
       if (mode === 'endless') {
         setInitialTimeLimit(180);
@@ -84,6 +88,7 @@ function GameScreen({
         // timer.start();
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, userId, difficulty, useTimer]);
 
   // Handle answer selection
@@ -200,6 +205,7 @@ function GameScreen({
 
           <WordDisplay
             word={currentWord.correctWord.word}
+            simpleCategory={currentWord.correctWord.simpleCategory}
             pos={currentWord.correctWord.pos}
             pronunciation={currentWord.correctWord.pronunciation}
           />
@@ -216,6 +222,7 @@ function GameScreen({
                   difficultyBand: currentWord.correctWord.difficulty_band,
                   overallDifficultyScore: currentWord.correctWord.overall_difficulty_score,
                   wordInDefinition: currentWord.correctWord.word_in_definition,
+                  simpleCategory: currentWord.correctWord.simpleCategory,
                   word: currentWord.correctWord.word,
                   syllables: currentWord.correctWord.pronunciation?.syllables,
                   pos: currentWord.correctWord.pos,
@@ -230,6 +237,7 @@ function GameScreen({
                   difficultyBand: w.difficulty_band,
                   overallDifficultyScore: w.overall_difficulty_score,
                   wordInDefinition: w.word_in_definition,
+                  simpleCategory: w.simpleCategory,
                   word: w.word,
                   syllables: w.pronunciation?.syllables,
                   pos: w.pos,
@@ -258,6 +266,7 @@ function GameScreen({
                   difficultyBand={def.difficultyBand}
                   overallDifficultyScore={def.overallDifficultyScore}
                   wordInDefinition={def.wordInDefinition}
+                  simpleCategory={def.simpleCategory}
                   word={def.word}
                   syllables={def.syllables}
                   pos={def.pos}

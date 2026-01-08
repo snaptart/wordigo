@@ -44,6 +44,18 @@
   margin: 0;
 }
 
+/* Category - displayed before POS */
+.word-category {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  font-family: var(--font-secondary); /* Sans-serif for category */
+  font-weight: 500;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--color-surface-secondary, rgba(0, 0, 0, 0.05));
+  border-radius: 4px;
+}
+
 /* Part of speech - italic serif */
 .word-pos {
   font-size: var(--font-size-xl);
@@ -71,6 +83,11 @@
 
   .word-syllables {
     font-size: 0.95rem;
+  }
+
+  .word-category {
+    font-size: 0.875rem;
+    padding: 0.2rem 0.4rem;
   }
 
   .word-pos {

@@ -2,6 +2,7 @@ import './WordDisplay.css';
 
 interface WordDisplayProps {
   word: string;
+  simpleCategory?: string | null;
   pos?: string;
   pronunciation?: {
     ipa: string;
@@ -22,7 +23,7 @@ const getPosName = (pos?: string): string => {
   return posMap[pos] || pos;
 };
 
-export default function WordDisplay({ word, pos, pronunciation }: WordDisplayProps) {
+export default function WordDisplay({ word, simpleCategory, pos, pronunciation }: WordDisplayProps) {
   return (
     <div className="word-display">
       <div className="word-headword-line">

@@ -40,6 +40,7 @@ interface WordData {
   senseid: number;
   lexdomainid: number;
   lexdomainname: string;
+  simpleCategory?: string | null; // Display name from category_groups (via lexdomain_category)
   pos?: string; // Part of speech (n, v, a, r, s)
   posName?: string; // Full POS name (noun, verb, adjective, adverb)
   // All difficulty fields now come from wordigo_difficulty_calculated
@@ -65,6 +66,39 @@ interface GameWord {
   }>;
   defOrder: number;
   timer: number;
+}
+
+/**
+ * Get the simple category display name from lexdomain_category (lexdomainname)
+ * Looks up the lexdomain → category_group_mapping → category_group
+ */
+export async function getSimpleCategoryDisplayName(lexdomainCategory?: string | null): Promise<string | null> {
+  if (!lexdomainCategory) return null;
+
+  try {
+    // Find the lexdomain by name
+    const lexdomain = await prisma.lexdomains.findFirst({
+      where: { lexdomainname: lexdomainCategory },
+      select: { lexdomainid: true }
+    });
+
+    if (!lexdomain) return null;
+
+    // Find the category group mapping
+    const mapping = await prisma.category_group_mappings.findFirst({
+      where: { lexdomain_id: lexdomain.lexdomainid },
+      include: {
+        category_group: {
+          select: { display_name: true }
+        }
+      }
+    });
+
+    return mapping?.category_group?.display_name ?? null;
+  } catch (error) {
+    console.error('Error fetching category group:', error);
+    return null;
+  }
 }
 
 /**
@@ -114,6 +148,9 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
   const calculatedDiff = selectedSense.wordigo_difficulty_calculated;
   const correctPos = selectedSense.synsets.pos;
 
+  // Get simple category display name
+  const simpleCategory = await getSimpleCategoryDisplayName(calculatedDiff?.lexdomain_category);
+
   // Build correct word object
   const correctWordData: WordData = {
     wordid: selectedSense.words.wordid,
@@ -125,6 +162,7 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
     senseid: selectedSense.senseid,
     lexdomainid: selectedSense.synsets.lexdomainid,
     lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
+    simpleCategory,
     pos: correctPos,
     posName: getPosName(correctPos),
     word_in_definition: calculatedDiff?.word_in_definition ?? null,
@@ -187,6 +225,9 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
     const fallbackCalcDiff = sense.wordigo_difficulty_calculated;
     const fallbackPos = sense.synsets.pos;
 
+    // Get simple category for fallback word
+    const fallbackSimpleCategory = await getSimpleCategoryDisplayName(fallbackCalcDiff?.lexdomain_category);
+
     const wrongWordData: WordData = {
       wordid: sense.words.wordid,
       lemma: sense.words.lemma,
@@ -197,6 +238,7 @@ export async function getRandomWord(difficulty?: number): Promise<GameWord> {
       senseid: sense.senseid,
       lexdomainid: sense.synsets.lexdomainid,
       lexdomainname: sense.synsets.lexdomains.lexdomainname,
+      simpleCategory: fallbackSimpleCategory,
       pos: fallbackPos,
       posName: getPosName(fallbackPos),
       word_in_definition: fallbackCalcDiff?.word_in_definition ?? null,
@@ -923,6 +965,9 @@ async function getWordFromSynset(
 
   const pos = randomSense.synsets.pos;
 
+  // Get simple category display name
+  const simpleCategory = await getSimpleCategoryDisplayName(calculatedDiff?.lexdomain_category);
+
   return {
     wordid: randomSense.words.wordid,
     lemma: randomSense.words.lemma,
@@ -933,6 +978,7 @@ async function getWordFromSynset(
     senseid: randomSense.senseid,
     lexdomainid: randomSense.synsets.lexdomainid,
     lexdomainname: randomSense.synsets.lexdomains.lexdomainname,
+    simpleCategory,
     pos: pos,
     posName: getPosName(pos),
     word_in_definition: calculatedDiff?.word_in_definition ?? null,

@@ -18,7 +18,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { WordData } from './wordService';
+import { WordData, getSimpleCategoryDisplayName } from './wordService';
 
 const prisma = new PrismaClient();
 
@@ -647,7 +647,7 @@ async function getRandomDescendants(
   const safeExcludeSynsetIds = excludeSynsetIds.length > 0 ? excludeSynsetIds : [-1];
 
   const query = `
-    SELECT DISTINCT
+    SELECT DISTINCT ON (sen.senseid)
       w.wordid,
       w.lemma,
       s.synsetid,
@@ -661,7 +661,9 @@ async function getRandomDescendants(
       wdc.difficulty_band,
       wdc.def_char_count,
       wdc.word_in_definition,
-      wdc.overall_difficulty_score
+      wdc.overall_difficulty_score,
+      wdc.lexdomain_category,
+      RANDOM() as random_order
     FROM semlinks sl1
     JOIN semlinks sl2 ON sl1.synset1id = sl2.synset2id
     JOIN synsets s ON sl2.synset1id = s.synsetid
@@ -672,7 +674,7 @@ async function getRandomDescendants(
     LEFT JOIN wordigo_difficulty_calculated wdc ON sen.senseid = wdc.senseid
     WHERE sl1.synset2id = $1
       AND s.synsetid NOT IN (${safeExcludeSynsetIds.join(',')})
-    ORDER BY RANDOM()
+    ORDER BY sen.senseid, random_order
     LIMIT ${limit * 3}
   `;
 
@@ -694,6 +696,9 @@ async function getRandomDescendants(
       wordLength <= threshold.max &&
       !excludeLemmas.includes(row.lemma.toLowerCase())
     ) {
+      // Get simple category display name
+      const simpleCategory = await getSimpleCategoryDisplayName(row.lexdomain_category);
+
       descendants.push({
         word: {
           wordid: row.wordid,
@@ -705,6 +710,7 @@ async function getRandomDescendants(
           senseid: row.senseid,
           lexdomainid: row.lexdomainid,
           lexdomainname: row.lexdomainname,
+          simpleCategory,
           pos: row.pos,
           posName: getPosName(row.pos),
           word_in_definition: row.word_in_definition,

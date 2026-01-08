@@ -45,6 +45,7 @@ export interface PreloadedWord {
     difficulty_band?: number | null;
     overall_difficulty_score?: number | null;
     word_in_definition?: boolean | null;
+    simpleCategory?: string | null;
     pos?: string;
     posName?: string;
     pronunciation?: {
@@ -63,6 +64,7 @@ export interface PreloadedWord {
     difficulty_band?: number | null;
     overall_difficulty_score?: number | null;
     word_in_definition?: boolean | null;
+    simpleCategory?: string | null;
     pos?: string;
     posName?: string;
     pronunciation?: {
