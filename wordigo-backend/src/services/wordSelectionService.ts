@@ -8,16 +8,26 @@ import { PrismaClient } from '@prisma/client';
 import { WordSelectionOptions, WordLengthFilter } from '../types';
 import { getUserPreferences, getAdaptiveDifficultyBand } from './userPreferencesService';
 import categoryGroupService from './categoryGroupService';
-import { GameWord, WordData, getRandomWord as getBasicRandomWord, fetchPronunciationData } from './wordService';
+import { GameWord, WordData, getRandomWord as getBasicRandomWord, fetchPronunciationData, getSimpleCategoryDisplayName } from './wordService';
 import { getWrongDefinitions } from './wrongDefinitionService';
+import { getLinguistWrongDefinitions } from './linguistWrongDefinitionService';
 
 const prisma = new PrismaClient();
 
+// ============================================================================
+// FEATURE FLAG: LINGUIST DIFFICULTY SYSTEM
+// ============================================================================
+// Toggle between current wrong definition system and linguist's 5-level system
+// Set to 'current' for existing behavior, 'linguist' for new system
+// Can also be set to 'user_preference' to allow per-user choice (future enhancement)
+const WRONG_DEFINITION_STRATEGY: 'current' | 'linguist' | 'user_preference' = 'linguist';
+
 // Word length thresholds
+// Note: All filters have min: 0 to allow any word up to the max length
 const WORD_LENGTH_THRESHOLDS = {
-  short: { min: 0, max: 6 },
-  medium: { min: 7, max: 12 },
-  long: { min: 13, max: 100 },
+  short: { min: 0, max: 7 },
+  medium: { min: 0, max: 14 },
+  long: { min: 0, max: 42 },
   all: { min: 0, max: 200 }
 };
 
@@ -243,6 +253,9 @@ async function getFilteredRandomWord(
     const calculatedDiff = selectedSense.wordigo_difficulty_calculated;
     const correctPos = selectedSense.synsets.pos;
 
+    // Get simple category display name
+    const simpleCategory = await getSimpleCategoryDisplayName(calculatedDiff?.lexdomain_category);
+
     const correctWordData: WordData = {
       wordid: selectedSense.words.wordid,
       lemma: selectedSense.words.lemma,
@@ -253,6 +266,7 @@ async function getFilteredRandomWord(
       senseid: selectedSense.senseid,
       lexdomainid: selectedSense.synsets.lexdomainid,
       lexdomainname: selectedSense.synsets.lexdomains.lexdomainname,
+      simpleCategory,
       pos: correctPos,
       posName: getPosName(correctPos),
       word_in_definition: calculatedDiff?.word_in_definition ?? null,
@@ -320,6 +334,7 @@ async function getWrongDefinitionsWithFilter(
   const threshold = WORD_LENGTH_THRESHOLDS[wordLengthFilter];
 
   console.log(`[WrongDefs] Getting wrong definitions with filters:`, {
+    strategy: WRONG_DEFINITION_STRATEGY,
     wordLengthFilter: `${wordLengthFilter} (${threshold.min}-${threshold.max} chars)`,
     difficultyBand,
     allowObscureWords,
@@ -339,12 +354,41 @@ async function getWrongDefinitionsWithFilter(
     console.log(`[WrongDefs] Filtering to ${categoryDomainIds.length} category domains`);
   }
 
-  // Get 3 wrong definitions using centralized wrong definition service
-  const wrongDefResults = await getWrongDefinitions(correctWordData, difficultyBand, {
-    wordLengthFilter,
-    categoryDomainIds,
-    allowObscureWords
-  });
+  // Get 3 wrong definitions using the selected strategy
+  let wrongDefResults: any[];
+
+  if (WRONG_DEFINITION_STRATEGY === 'linguist') {
+    // Use the new linguist system
+    console.log(`[WrongDefs] Using LINGUIST strategy for level ${difficultyBand}`);
+
+    const linguistResults = await getLinguistWrongDefinitions(
+      correctWordData,
+      difficultyBand || 3,
+      {
+        wordLengthFilter,
+        categoryDomainIds,
+        allowObscureWords,
+        excludeSynsetIds: excludedSynsetIds,
+        excludeLemmas: [correctWordData.lemma.toLowerCase()]
+      }
+    );
+
+    // Convert linguist results to expected format
+    wrongDefResults = linguistResults.map(lr => ({
+      word: lr.word,
+      strategy: lr.strategy
+    }));
+
+  } else {
+    // Use the current/original system
+    console.log(`[WrongDefs] Using CURRENT strategy`);
+
+    wrongDefResults = await getWrongDefinitions(correctWordData, difficultyBand, {
+      wordLengthFilter,
+      categoryDomainIds,
+      allowObscureWords
+    });
+  }
 
   // Convert results to the format expected by this service
   for (const wrongDef of wrongDefResults) {

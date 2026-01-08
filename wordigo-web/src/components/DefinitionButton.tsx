@@ -19,12 +19,14 @@ interface DefinitionButtonProps {
   difficultyBand?: number | null;
   overallDifficultyScore?: number | null;
   wordInDefinition?: boolean | null;
+  simpleCategory?: string | null;
   word?: string;
   syllables?: string | string[]; // Can be formatted string or array
   pos?: string;
   posName?: string;
   ipa?: string;
   showMetadata?: boolean;
+  isWinnowed?: boolean;
 }
 
 export default function DefinitionButton({
@@ -37,12 +39,14 @@ export default function DefinitionButton({
   strategy,
   difficultyBand,
   overallDifficultyScore,
+  simpleCategory,
   word,
   syllables,
   pos,
   posName,
   ipa,
   showMetadata = true,
+  isWinnowed = false,
 }: DefinitionButtonProps) {
   const getClassName = () => {
     let className = 'definition-button';
@@ -50,6 +54,7 @@ export default function DefinitionButton({
     if (isIncorrect) className += ' incorrect';
     if (isSelected && !isCorrect && !isIncorrect) className += ' selected';
     if (disabled) className += ' disabled';
+    if (isWinnowed) className += ' winnowed';
     return className;
   };
 
@@ -101,9 +106,9 @@ export default function DefinitionButton({
         {/* POS (italic) - use full name if available, otherwise abbreviation */}
         {(posName || pos) && <span className="dict-pos">{posName || pos}</span>}
 
-        {/* Metadata in brackets - compact format: [Strategy, Band X, Y.Z] */}
+        {/* Metadata in brackets - compact format: [Category, Strategy, Band X, Y.Z] */}
         <span className="dict-metadata">
-          [{formatStrategy(strategy)}, Band {difficultyBand ?? 'N/A'}, {overallDifficultyScore?.toFixed(1) ?? 'N/A'}]
+          [{simpleCategory ? `${simpleCategory}, ` : ''}{formatStrategy(strategy)}, Band {difficultyBand ?? 'N/A'}, {overallDifficultyScore?.toFixed(1) ?? 'N/A'}]
         </span>
 
         {/* Definition  */}

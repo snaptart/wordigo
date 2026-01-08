@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameEngine } from '../game/GameEngine';
 import { EndlessMode } from '../game/EndlessMode';
 import { SprintMode } from '../game/SprintMode';
@@ -36,10 +36,12 @@ export function useGameEngine(): UseGameEngineResult {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFetchingBatch, setIsFetchingBatch] = useState(false);
+  const lastProcessedIndex = useRef<number>(-1);
 
   // Create history record when word is displayed
   useEffect(() => {
-    if (engine && engine.currentWord) {
+    if (engine && engine.currentWord && currentWordIndex !== lastProcessedIndex.current) {
+      lastProcessedIndex.current = currentWordIndex;
       engine.createHistoryForCurrentWord();
     }
   }, [engine, currentWordIndex]);
@@ -105,6 +107,7 @@ export function useGameEngine(): UseGameEngineResult {
       setSelectedDefinition(null);
       setShowResult(false);
       setIsLoading(false);
+      lastProcessedIndex.current = -1; // Reset tracking for new game
     } catch (err) {
       setError('Failed to start game');
       setIsLoading(false);

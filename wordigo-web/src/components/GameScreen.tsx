@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useGameEngine, type GameMode } from '../hooks/useGameEngine';
 import { useTimer as useGameTimer } from '../hooks/useTimer';
 import type { CompleteGameResponse } from '../types/index';
@@ -61,6 +61,8 @@ function GameScreen({
   const [showMetadata, setShowMetadata] = useState(false);
   const [timerEnabled, setTimerEnabled] = useState(useTimer);
   const [initialTimeLimit, setInitialTimeLimit] = useState(180);
+  const [winnowedIndices, setWinnowedIndices] = useState<number[]>([]);
+  const hasStartedGame = useRef(false);
 
   const handleTimeout = async () => {
     if (engine) {
@@ -74,6 +76,9 @@ function GameScreen({
 
   // Start the game when component mounts
   useEffect(() => {
+    if (hasStartedGame.current) return;
+    hasStartedGame.current = true;
+
     startGame(mode, userId, difficulty, useTimer).then(() => {
       if (mode === 'endless') {
         setInitialTimeLimit(180);
@@ -83,6 +88,7 @@ function GameScreen({
         // timer.start();
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, userId, difficulty, useTimer]);
 
   // Handle answer selection
@@ -90,6 +96,9 @@ function GameScreen({
     if (selectedDefinition !== null || !currentWord || !engine) return;
 
     await handleSelectDefinition(senseId, timer.timeRemaining);
+
+    // Reset winnowed definitions when answer is selected
+    setWinnowedIndices([]);
 
     // Check if game ended
     if (engine.state.isComplete && engine.state.gameResults) {
@@ -119,8 +128,9 @@ function GameScreen({
       return;
     }
 
-    // Reset metadata visibility when moving to next word
+    // Reset metadata visibility and winnowed definitions when moving to next word
     setShowMetadata(false);
+    setWinnowedIndices([]);
     handleNextWord();
   };
 
@@ -149,6 +159,42 @@ function GameScreen({
     );
   }
 
+  // Handle winnow - remove a random wrong definition
+  const handleWinnow = () => {
+    if (!currentWord || winnowedIndices.length >= 3) return;
+
+    // Create array of all 4 definitions
+    const definitions = [
+      { isCorrect: true, index: 0 },
+      ...currentWord.wrongWords.map((_, i) => ({ isCorrect: false, index: i + 1 })),
+    ];
+
+    // Shuffle based on defOrder to match displayed order
+    const shuffled = [...definitions];
+    const correctDef = shuffled.shift()!;
+    shuffled.splice(currentWord.defOrder, 0, correctDef);
+
+    // Find indices of wrong definitions that haven't been winnowed
+    const availableWrongIndices = shuffled
+      .map((def, index) => ({ ...def, displayIndex: index }))
+      .filter(def => !def.isCorrect && !winnowedIndices.includes(def.displayIndex))
+      .map(def => def.displayIndex);
+
+    if (availableWrongIndices.length === 0) return;
+
+    // Pick a random wrong definition to winnow
+    const randomIndex = Math.floor(Math.random() * availableWrongIndices.length);
+    const indexToWinnow = availableWrongIndices[randomIndex];
+
+    setWinnowedIndices([...winnowedIndices, indexToWinnow]);
+  };
+
+  const handleToggleMetadata = () => {
+    // Reset winnowed definitions when divulge is clicked
+    setWinnowedIndices([]);
+    setShowMetadata(!showMetadata);
+  };
+
   return (
     <div className="app">
       <div className="game-container">
@@ -159,6 +205,7 @@ function GameScreen({
 
           <WordDisplay
             word={currentWord.correctWord.word}
+            simpleCategory={currentWord.correctWord.simpleCategory}
             pos={currentWord.correctWord.pos}
             pronunciation={currentWord.correctWord.pronunciation}
           />
@@ -175,6 +222,7 @@ function GameScreen({
                   difficultyBand: currentWord.correctWord.difficulty_band,
                   overallDifficultyScore: currentWord.correctWord.overall_difficulty_score,
                   wordInDefinition: currentWord.correctWord.word_in_definition,
+                  simpleCategory: currentWord.correctWord.simpleCategory,
                   word: currentWord.correctWord.word,
                   syllables: currentWord.correctWord.pronunciation?.syllables,
                   pos: currentWord.correctWord.pos,
@@ -189,6 +237,7 @@ function GameScreen({
                   difficultyBand: w.difficulty_band,
                   overallDifficultyScore: w.overall_difficulty_score,
                   wordInDefinition: w.word_in_definition,
+                  simpleCategory: w.simpleCategory,
                   word: w.word,
                   syllables: w.pronunciation?.syllables,
                   pos: w.pos,
@@ -217,12 +266,14 @@ function GameScreen({
                   difficultyBand={def.difficultyBand}
                   overallDifficultyScore={def.overallDifficultyScore}
                   wordInDefinition={def.wordInDefinition}
+                  simpleCategory={def.simpleCategory}
                   word={def.word}
                   syllables={def.syllables}
                   pos={def.pos}
                   posName={def.posName}
                   ipa={def.ipa}
                   showMetadata={showMetadata}
+                  isWinnowed={winnowedIndices.includes(index)}
                 />
               ));
             })()}
@@ -253,7 +304,9 @@ function GameScreen({
         currentWord={currentWordIndex + 1}
         totalWords={mode === 'endless' ? undefined : totalWords}
         showMetadata={showMetadata}
-        onToggleMetadata={() => setShowMetadata(!showMetadata)}
+        onToggleMetadata={handleToggleMetadata}
+        onWinnow={handleWinnow}
+        winnowDisabled={winnowedIndices.length >= 3 || showResult}
       />
 
       {/* Global Menu Overlay */}

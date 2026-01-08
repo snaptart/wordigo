@@ -25,6 +25,20 @@
   }
 }
 
+@keyframes slideOffLeft {
+  to {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOffRight {
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
 .definition-button * {
   color: inherit !important; /* Force all child elements to inherit */
   -webkit-text-fill-color: inherit; /* Force text color on iOS Safari */
@@ -60,6 +74,20 @@
 .definition-button.disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.definition-button.winnowed {
+  animation: var(--winnow-direction, slideOffLeft) 0.5s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Randomly apply left or right slide */
+.definition-button.winnowed:nth-child(odd) {
+  --winnow-direction: slideOffLeft;
+}
+
+.definition-button.winnowed:nth-child(even) {
+  --winnow-direction: slideOffRight;
 }
 
 .definition-content {
