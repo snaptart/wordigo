@@ -54,8 +54,6 @@ function GameScreen({
     error,
     hintsRemaining,
     sessionScore,
-    hintsUsedThisWord,
-    divulgedThisWord,
     handleSelectDefinition,
     handleNextWord,
     handleWinnowClick,
