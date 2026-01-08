@@ -275,7 +275,6 @@ function GameScreen({
         <div key={currentWordIndex}>
           <WordDisplay
             word={currentWord.correctWord.word}
-            simpleCategory={currentWord.correctWord.simpleCategory}
             pos={currentWord.correctWord.pos}
             pronunciation={currentWord.correctWord.pronunciation}
           />
