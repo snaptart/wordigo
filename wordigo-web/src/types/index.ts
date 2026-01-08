@@ -93,14 +93,19 @@ export interface SubmitWordResponse {
   strikes: number;
   gameOver: boolean;
   reason?: 'strikes' | 'timeout';
+  pointsEarned: number;       // Points earned for this word
+  hintsRemaining: number;     // Updated hint count after this answer
+  sessionScore: number;       // Running total score for the game
 }
 
 export interface CompleteGameResponse {
   finalScore: number;
+  sessionScore: number;          // Session score (same as finalScore with new system)
   correctWords: number;
   totalWords: number;
-  timeBonus: number;
-  wordPoints: number;
+  timeBonus: number;             // Deprecated: kept for backward compatibility
+  wordPoints: number;            // Deprecated: kept for backward compatibility
+  totalPointsAllTime?: number;   // Only for logged-in users
 }
 
 export interface FetchNextBatchResponse {
