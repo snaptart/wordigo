@@ -49,7 +49,6 @@ export function useGameEngine(): UseGameEngineResult {
   const [sessionScore, setSessionScore] = useState<number>(0);
   const [hintsUsedThisWord, setHintsUsedThisWord] = useState<number>(0);
   const [divulgedThisWord, setDivulgedThisWord] = useState<boolean>(false);
-  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   // Create history record when word is displayed
   useEffect(() => {
@@ -123,7 +122,6 @@ export function useGameEngine(): UseGameEngineResult {
       lastProcessedIndex.current = -1; // Reset tracking for new game
 
       // Initialize scoring system
-      setUserId(userId);
       setHintsRemaining(userId ? 3 : 0);  // 3 hints for logged-in users, 0 for guests
       setSessionScore(0);
       setHintsUsedThisWord(0);
@@ -261,7 +259,6 @@ export function useGameEngine(): UseGameEngineResult {
     setSessionScore(0);
     setHintsUsedThisWord(0);
     setDivulgedThisWord(false);
-    setUserId(undefined);
   }, [engine]);
 
   return {
