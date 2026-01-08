@@ -116,11 +116,11 @@ export class ScoringService {
       return 3;
     }
 
-    const difficultyLevel = userPreferences.default_difficulty as DifficultyLevel;
+    const difficultyLevel = userPreferences.defaultDifficulty as DifficultyLevel;
 
     // For adaptive difficulty, read current band from adaptive data
     if (difficultyLevel === 'adaptive') {
-      const adaptiveData = userPreferences.adaptive_difficulty_data as any;
+      const adaptiveData = userPreferences.adaptiveDifficultyData as any;
       if (adaptiveData && typeof adaptiveData.currentBand === 'number') {
         return Math.max(1, Math.min(5, adaptiveData.currentBand)); // Clamp to 1-5
       }
@@ -143,7 +143,7 @@ export class ScoringService {
       return 'all'; // Guests see all word lengths
     }
 
-    return userPreferences.word_length_filter as 'short' | 'medium' | 'long' | 'all';
+    return userPreferences.wordLengthFilter as 'short' | 'medium' | 'long' | 'all';
   }
 }
 
