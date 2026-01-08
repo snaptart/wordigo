@@ -250,7 +250,7 @@ export async function createHistory(req: Request, res: Response) {
  */
 export async function submitWord(req: Request, res: Response) {
   try {
-    const { gameId, historyId, selectedSenseId, correctSenseId } = req.body;
+    const { gameId, historyId, selectedSenseId, correctSenseId, hintsUsed, divulged } = req.body;
 
     // Validate required fields
     if (!gameId || !historyId || selectedSenseId === undefined || !correctSenseId) {
@@ -260,13 +260,26 @@ export async function submitWord(req: Request, res: Response) {
       });
     }
 
-    // Submit answer
+    console.log('[SCORING] submitWord request:', {
+      gameId,
+      historyId,
+      selectedSenseId,
+      correctSenseId,
+      hintsUsed,
+      divulged
+    });
+
+    // Submit answer with optional scoring parameters
     const result = await submitWordAnswer({
       gameId,
       historyId,
       selectedSenseId,
       correctSenseId,
+      hintsUsed: hintsUsed || 0,      // Default to 0 if not provided
+      divulged: divulged || false,    // Default to false if not provided
     });
+
+    console.log('[SCORING] submitWord response:', result);
 
     res.json({
       success: true,

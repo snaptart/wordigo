@@ -2,6 +2,7 @@ import './StrikeCounter.css';
 
 interface StrikeCounterProps {
   strikes: number;
+  hintsRemaining?: number;
   currentWord?: number;
   totalWords?: number;
   timeRemaining?: number;
@@ -11,7 +12,7 @@ interface StrikeCounterProps {
   winnowDisabled?: boolean;
 }
 
-export default function StrikeCounter({ strikes, currentWord, totalWords, showMetadata, onToggleMetadata, onWinnow, winnowDisabled }: StrikeCounterProps) {
+export default function StrikeCounter({ strikes, hintsRemaining = 0, currentWord, totalWords, showMetadata, onToggleMetadata, onWinnow, winnowDisabled }: StrikeCounterProps) {
   return (
     <div className="strike-counter">
       {currentWord !== undefined && (
@@ -43,6 +44,18 @@ export default function StrikeCounter({ strikes, currentWord, totalWords, showMe
         )}
       </div>
       <div className="strike-section">
+        {/* Hint dots (blue) - only show if hints are available */}
+        {hintsRemaining > 0 && (
+          <div className="hint-dots">
+            {[0, 1, 2].map((index) => (
+              <div
+                key={index}
+                className={`hint-dot ${index < hintsRemaining ? 'active' : ''}`}
+              />
+            ))}
+          </div>
+        )}
+        {/* Strike dots (red) */}
         <div className="strike-dots">
           {[0, 1, 2].map((index) => (
             <div

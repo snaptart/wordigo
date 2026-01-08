@@ -8,6 +8,9 @@ export interface AnswerResult {
   shouldEndGame: boolean;
   shouldAdvance: boolean;
   gameResults?: CompleteGameResponse;
+  pointsEarned?: number;          // Points earned for this word
+  hintsRemaining?: number;        // Updated hint count
+  sessionScore?: number;          // Running total score
 }
 
 export interface GameState {
@@ -51,7 +54,9 @@ export abstract class GameEngine {
   // Core game logic
   async submitAnswer(
     senseId: number,
-    timeRemaining: number
+    timeRemaining: number,
+    hintsUsed: number = 0,
+    divulged: boolean = false
   ): Promise<AnswerResult> {
     const currentWord = this.currentWord;
     if (!currentWord) {
@@ -76,6 +81,8 @@ export abstract class GameEngine {
       historyId: currentWord.historyId,
       selectedSenseId: senseId,
       correctSenseId: currentWord.correctWord.senseid,
+      hintsUsed,
+      divulged,
     });
 
     // If game is ending, wait for server confirmation
@@ -128,10 +135,18 @@ export abstract class GameEngine {
       };
     }
 
-    // For normal flow, submit in background
-    submitPromise.catch((err) => {
-      console.error('Failed to submit answer in background', err);
-    });
+    // For normal flow, wait for submit to get scoring data
+    let scoringData = {};
+    try {
+      const result = await submitPromise;
+      scoringData = {
+        pointsEarned: result.pointsEarned,
+        hintsRemaining: result.hintsRemaining,
+        sessionScore: result.sessionScore,
+      };
+    } catch (err) {
+      console.error('Failed to submit answer', err);
+    }
 
     return {
       isCorrect,
@@ -139,6 +154,7 @@ export abstract class GameEngine {
       correctCount: this.correctCount,
       shouldEndGame: false,
       shouldAdvance: this.shouldAutoAdvance(),
+      ...scoringData,
     };
   }
 

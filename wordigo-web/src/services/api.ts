@@ -107,6 +107,8 @@ export const submitWordAnswer = async (data: {
   historyId: number;
   selectedSenseId: number;
   correctSenseId: number;
+  hintsUsed?: number;
+  divulged?: boolean;
 }): Promise<SubmitWordResponse> => {
   console.log('API Request: POST /game/submit-word');
   try {

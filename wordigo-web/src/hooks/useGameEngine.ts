@@ -19,8 +19,14 @@ interface UseGameEngineResult {
   isLoading: boolean;
   error: string | null;
   isFetchingBatch: boolean;
+  hintsRemaining: number;           // NEW: Current hint count (3 for logged-in, 0 for guests)
+  sessionScore: number;             // NEW: Running session score
+  hintsUsedThisWord: number;        // NEW: Hints used on current word
+  divulgedThisWord: boolean;        // NEW: Whether divulge was clicked
   handleSelectDefinition: (senseId: number, timeRemaining: number) => Promise<void>;
   handleNextWord: () => void;
+  handleWinnowClick: () => void;    // NEW: Handle winnow/hint usage
+  handleDivulgeClick: () => void;   // NEW: Handle divulge click
   startGame: (mode: GameMode, userId?: number, difficulty?: string, useTimer?: boolean) => Promise<void>;
   resetGame: () => Promise<void>;
 }
@@ -37,6 +43,13 @@ export function useGameEngine(): UseGameEngineResult {
   const [error, setError] = useState<string | null>(null);
   const [isFetchingBatch, setIsFetchingBatch] = useState(false);
   const lastProcessedIndex = useRef<number>(-1);
+
+  // Scoring system state
+  const [hintsRemaining, setHintsRemaining] = useState<number>(0);
+  const [sessionScore, setSessionScore] = useState<number>(0);
+  const [hintsUsedThisWord, setHintsUsedThisWord] = useState<number>(0);
+  const [divulgedThisWord, setDivulgedThisWord] = useState<boolean>(false);
+  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   // Create history record when word is displayed
   useEffect(() => {
@@ -108,6 +121,13 @@ export function useGameEngine(): UseGameEngineResult {
       setShowResult(false);
       setIsLoading(false);
       lastProcessedIndex.current = -1; // Reset tracking for new game
+
+      // Initialize scoring system
+      setUserId(userId);
+      setHintsRemaining(userId ? 3 : 0);  // 3 hints for logged-in users, 0 for guests
+      setSessionScore(0);
+      setHintsUsedThisWord(0);
+      setDivulgedThisWord(false);
     } catch (err) {
       setError('Failed to start game');
       setIsLoading(false);
@@ -123,11 +143,23 @@ export function useGameEngine(): UseGameEngineResult {
     setShowResult(true);
 
     try {
-      const result = await engine.submitAnswer(senseId, timeRemaining);
+      const result = await engine.submitAnswer(
+        senseId,
+        timeRemaining,
+        hintsUsedThisWord,
+        divulgedThisWord
+      );
 
       // Update state from result
       setStrikes(result.strikes);
       setCorrectCount(result.correctCount);
+
+      // Update scoring state from server response
+      if (result.sessionScore !== undefined) {
+        setSessionScore(result.sessionScore);
+        setHintsRemaining(result.hintsRemaining ?? 0);
+        console.log('Score updated:', result.sessionScore, 'Points earned:', result.pointsEarned);
+      }
 
       if (result.shouldEndGame) {
         // Game is ending, parent component should handle transition to results
@@ -140,6 +172,9 @@ export function useGameEngine(): UseGameEngineResult {
         setTimeout(() => {
           setSelectedDefinition(null);
           setShowResult(false);
+          // Reset per-word tracking
+          setHintsUsedThisWord(0);
+          setDivulgedThisWord(false);
           engine.advanceToNextWord();
           setCurrentWordIndex(engine.state.currentWordIndex);
         }, delay);
@@ -150,7 +185,7 @@ export function useGameEngine(): UseGameEngineResult {
       console.error('Failed to handle answer selection:', err);
       setError('Failed to submit answer');
     }
-  }, [engine, selectedDefinition]);
+  }, [engine, selectedDefinition, hintsUsedThisWord, divulgedThisWord]);
 
   const handleNextWord = useCallback(async () => {
     if (!engine) return;
@@ -164,6 +199,9 @@ export function useGameEngine(): UseGameEngineResult {
     // Advance to next word
     setSelectedDefinition(null);
     setShowResult(false);
+    // Reset per-word tracking
+    setHintsUsedThisWord(0);
+    setDivulgedThisWord(false);
     engine.advanceToNextWord();
     setCurrentWordIndex(engine.state.currentWordIndex);
 
@@ -187,6 +225,19 @@ export function useGameEngine(): UseGameEngineResult {
     }
   }, [engine, isFetchingBatch]);
 
+  const handleWinnowClick = useCallback(() => {
+    if (hintsRemaining <= 0 || showResult) return;
+
+    setHintsUsedThisWord(prev => prev + 1);
+    setHintsRemaining(prev => prev - 1);
+  }, [hintsRemaining, showResult]);
+
+  const handleDivulgeClick = useCallback(() => {
+    if (showResult) return;
+
+    setDivulgedThisWord(true);
+  }, [showResult]);
+
   const resetGame = useCallback(async () => {
     if (engine && !engine.state.isComplete) {
       try {
@@ -205,6 +256,12 @@ export function useGameEngine(): UseGameEngineResult {
     setCurrentWordIndex(0);
     setTotalWords(0);
     setError(null);
+    // Reset scoring state
+    setHintsRemaining(0);
+    setSessionScore(0);
+    setHintsUsedThisWord(0);
+    setDivulgedThisWord(false);
+    setUserId(undefined);
   }, [engine]);
 
   return {
@@ -219,8 +276,14 @@ export function useGameEngine(): UseGameEngineResult {
     isLoading,
     error,
     isFetchingBatch,
+    hintsRemaining,
+    sessionScore,
+    hintsUsedThisWord,
+    divulgedThisWord,
     handleSelectDefinition,
     handleNextWord,
+    handleWinnowClick,
+    handleDivulgeClick,
     startGame,
     resetGame,
   };

@@ -8,7 +8,8 @@
 import { PrismaClient } from '@prisma/client';
 import { GameWord, getRandomWord } from './wordService';
 import { getRandomWordWithPreferences } from './wordSelectionService';
-import { updateAdaptiveDifficulty } from './userPreferencesService';
+import { updateAdaptiveDifficulty, getUserPreferences } from './userPreferencesService';
+import { ScoringService } from './scoringService';
 
 const prisma = new PrismaClient();
 
@@ -563,6 +564,8 @@ interface SubmitWordAnswerParams {
   historyId: number;
   selectedSenseId: number;
   correctSenseId: number;
+  hintsUsed?: number;    // Number of winnow clicks used (default: 0)
+  divulged?: boolean;    // Whether divulge was clicked (default: false)
 }
 
 interface SubmitWordAnswerResult {
@@ -570,13 +573,16 @@ interface SubmitWordAnswerResult {
   strikes: number;
   gameOver: boolean;
   reason?: 'strikes' | 'timeout';
+  pointsEarned: number;       // Points earned for this word
+  hintsRemaining: number;     // Updated hint count after this answer
+  sessionScore: number;       // Running total score for the game
 }
 
 /**
  * Submit answer for a single word in the new game format
  */
 export async function submitWordAnswer(params: SubmitWordAnswerParams): Promise<SubmitWordAnswerResult> {
-  const { gameId, historyId, selectedSenseId, correctSenseId } = params;
+  const { gameId, historyId, selectedSenseId, correctSenseId, hintsUsed = 0, divulged = false } = params;
 
   // Check if answer is correct
   const isCorrect = selectedSenseId === correctSenseId;
@@ -589,6 +595,9 @@ export async function submitWordAnswer(params: SubmitWordAnswerParams): Promise<
   if (!game) {
     throw new Error('Game not found');
   }
+
+  // Determine if this is a guest user
+  const isGuest = !game.userID;
 
   // Get current strikes (count incorrect answers)
   const incorrectAnswers = await prisma.wordigo_history.count({
@@ -610,24 +619,69 @@ export async function submitWordAnswer(params: SubmitWordAnswerParams): Promise<
     wordigoResult = currentStrikes + 1; // Increment strike number
   }
 
-  // Get the history record to calculate time spent
+  // Get the history record to calculate scoring and time spent
   const historyRecord = await prisma.wordigo_history.findUnique({
     where: { wordigoHistoryID: historyId },
     include: {
       correctSense: {
         include: {
-          wordigo_difficulty_calculated: true
+          wordigo_difficulty_calculated: true,
+          words: true  // Include word data to get word length
         }
       }
     }
   });
 
-  // Update history record
+  // Calculate points for this word (only if correct)
+  let pointsEarned = 0;
+  if (isCorrect) {
+    // Get word length category
+    const wordText = historyRecord?.correctSense?.words?.lemma || '';
+    const wordLengthCategory = ScoringService.getWordLengthCategory(wordText.length);
+
+    // Get difficulty level
+    let difficulty = 3; // Default to medium
+    if (!isGuest) {
+      try {
+        const userPreferences = await getUserPreferences(game.userID!);
+        difficulty = ScoringService.getDifficultyLevel(userPreferences);
+      } catch (error) {
+        console.error('Error fetching user preferences for scoring:', error);
+        // Use default difficulty
+      }
+    }
+
+    console.log('[SCORING] Calculation params:', {
+      wordText,
+      wordLength: wordText.length,
+      wordLengthCategory,
+      difficulty,
+      hintsUsed,
+      divulged,
+      isGuest
+    });
+
+    // Calculate points using scoring service
+    pointsEarned = ScoringService.calculateWordScore({
+      hintsUsed,
+      difficulty,
+      wordLength: wordLengthCategory,
+      divulged,
+      isGuest,
+    });
+
+    console.log('[SCORING] Points earned:', pointsEarned);
+  }
+
+  // Update history record with answer and scoring data
   await prisma.wordigo_history.update({
     where: { wordigoHistoryID: historyId },
     data: {
       senseidSelected: selectedSenseId,
       wordigoResult,
+      hints_used: hintsUsed,
+      points_earned: pointsEarned,
+      divulged: divulged,
     },
   });
 
@@ -636,11 +690,36 @@ export async function submitWordAnswer(params: SubmitWordAnswerParams): Promise<
   const newCorrectWords = isCorrect ? game.correctWords + 1 : game.correctWords;
   const newStrikes = isCorrect ? currentStrikes : wordigoResult;
 
+  // Update session score
+  const newSessionScore = (game.session_score || 0) + pointsEarned;
+
+  console.log('[SCORING] Session score update:', {
+    oldScore: game.session_score || 0,
+    pointsEarned,
+    newSessionScore
+  });
+
+  // Update hints remaining (logged-in users only)
+  // +1 hint for correct answer (max 3), no change for incorrect/guest
+  let newHintsRemaining = game.hints_remaining || 0;
+  if (isCorrect && !isGuest) {
+    newHintsRemaining = Math.min(newHintsRemaining + 1, 3);
+  }
+
+  console.log('[SCORING] Hints update:', {
+    oldHints: game.hints_remaining || 0,
+    newHintsRemaining,
+    isCorrect,
+    isGuest
+  });
+
   await prisma.wordigo_games.update({
     where: { id: gameId },
     data: {
       wordsCompleted: newWordsCompleted,
       correctWords: newCorrectWords,
+      session_score: newSessionScore,
+      hints_remaining: newHintsRemaining,
     },
   });
 
@@ -676,6 +755,9 @@ export async function submitWordAnswer(params: SubmitWordAnswerParams): Promise<
     strikes: newStrikes,
     gameOver,
     reason: gameOver ? 'strikes' : undefined,
+    pointsEarned,
+    hintsRemaining: newHintsRemaining,
+    sessionScore: newSessionScore,
   };
 }
 
@@ -687,15 +769,18 @@ interface CompleteGameParams {
 
 interface CompleteGameResult {
   finalScore: number;
+  sessionScore: number;          // Session score (same as finalScore with new system)
   correctWords: number;
   totalWords: number;
-  timeBonus: number;
-  wordPoints: number;
+  timeBonus: number;             // Deprecated: kept for backward compatibility
+  wordPoints: number;            // Deprecated: kept for backward compatibility
+  totalPointsAllTime?: number;   // Only for logged-in users
 }
 
 /**
  * Complete a game and calculate final score
- * Score = 1 point per correct word + 1 point per second remaining
+ * New scoring system: Uses session_score accumulated during gameplay
+ * Old system (deprecated): 1 point per correct word + 1 point per second remaining
  */
 export async function completeGame(params: CompleteGameParams): Promise<CompleteGameResult> {
   const { gameId, timeRemaining, reason = 'completed' } = params;
@@ -716,10 +801,12 @@ export async function completeGame(params: CompleteGameParams): Promise<Complete
     },
   });
 
-  // Calculate score
-  const wordPoints = game.correctWords; // 1 point per correct word
-  const timeBonus = Math.max(0, timeRemaining); // 1 point per second remaining
-  const finalScore = wordPoints + timeBonus;
+  // Use session_score as the final score (new scoring system)
+  const finalScore = game.session_score || 0;
+
+  // Deprecated scoring components (kept for backward compatibility)
+  const wordPoints = game.correctWords;
+  const timeBonus = Math.max(0, timeRemaining);
 
   // Update game record
   await prisma.wordigo_games.update({
@@ -733,12 +820,35 @@ export async function completeGame(params: CompleteGameParams): Promise<Complete
     },
   });
 
+  // Update all-time score for logged-in users
+  let totalPointsAllTime: number | undefined = undefined;
+  if (game.userID) {
+    await prisma.users.update({
+      where: { id: game.userID },
+      data: {
+        total_points_all_time: {
+          increment: finalScore,
+        },
+      },
+    });
+
+    // Fetch updated total
+    const user = await prisma.users.findUnique({
+      where: { id: game.userID },
+      select: { total_points_all_time: true },
+    });
+
+    totalPointsAllTime = user?.total_points_all_time || 0;
+  }
+
   return {
     finalScore,
+    sessionScore: finalScore,
     correctWords: game.correctWords,
     totalWords: game.totalWords,
     timeBonus,
     wordPoints,
+    totalPointsAllTime,
   };
 }
 

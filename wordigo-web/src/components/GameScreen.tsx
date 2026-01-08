@@ -52,8 +52,14 @@ function GameScreen({
     totalWords,
     isLoading,
     error,
+    hintsRemaining,
+    sessionScore,
+    hintsUsedThisWord,
+    divulgedThisWord,
     handleSelectDefinition,
     handleNextWord,
+    handleWinnowClick,
+    handleDivulgeClick,
     startGame,
   } = useGameEngine();
 
@@ -62,7 +68,10 @@ function GameScreen({
   const [timerEnabled, setTimerEnabled] = useState(useTimer);
   const [initialTimeLimit, setInitialTimeLimit] = useState(180);
   const [winnowedIndices, setWinnowedIndices] = useState<number[]>([]);
+  const [lastPointsEarned, setLastPointsEarned] = useState<number>(0);
+  const [allTimeScore, setAllTimeScore] = useState<number>(0);
   const hasStartedGame = useRef(false);
+  const previousSessionScore = useRef(sessionScore);
 
   const handleTimeout = async () => {
     if (engine) {
@@ -73,6 +82,45 @@ function GameScreen({
   };
 
   const timer = useGameTimer(initialTimeLimit, timerEnabled, handleTimeout);
+
+  // Track points earned from session score changes
+  useEffect(() => {
+    console.log('Session score changed:', sessionScore, 'Previous:', previousSessionScore.current);
+    if (sessionScore > previousSessionScore.current) {
+      const pointsEarned = sessionScore - previousSessionScore.current;
+      console.log('Points earned this word:', pointsEarned);
+      setLastPointsEarned(pointsEarned);
+    }
+    previousSessionScore.current = sessionScore;
+  }, [sessionScore]);
+
+  // Fetch all-time score for logged-in users
+  useEffect(() => {
+    const fetchAllTimeScore = async () => {
+      if (!isGuest && user) {
+        try {
+          // Fetch user data from backend to get total_points_all_time
+          const token = localStorage.getItem('wordigo_access_token');
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setAllTimeScore(data.data.total_points_all_time || 0);
+            console.log('[SCORING] Fetched all-time score:', data.data.total_points_all_time);
+          }
+        } catch (error) {
+          console.error('Failed to fetch all-time score:', error);
+          setAllTimeScore(0);
+        }
+      }
+    };
+
+    fetchAllTimeScore();
+  }, [isGuest, user]);
 
   // Start the game when component mounts
   useEffect(() => {
@@ -128,9 +176,10 @@ function GameScreen({
       return;
     }
 
-    // Reset metadata visibility and winnowed definitions when moving to next word
+    // Reset metadata visibility, winnowed definitions, and points earned display when moving to next word
     setShowMetadata(false);
     setWinnowedIndices([]);
+    setLastPointsEarned(0);
     handleNextWord();
   };
 
@@ -161,7 +210,10 @@ function GameScreen({
 
   // Handle winnow - remove a random wrong definition
   const handleWinnow = () => {
-    if (!currentWord || winnowedIndices.length >= 3) return;
+    if (!currentWord || winnowedIndices.length >= 3 || hintsRemaining <= 0) return;
+
+    // Call the hook to track hint usage
+    handleWinnowClick();
 
     // Create array of all 4 definitions
     const definitions = [
@@ -190,6 +242,10 @@ function GameScreen({
   };
 
   const handleToggleMetadata = () => {
+    if (!showMetadata) {
+      // Call the hook to track divulge usage
+      handleDivulgeClick();
+    }
     // Reset winnowed definitions when divulge is clicked
     setWinnowedIndices([]);
     setShowMetadata(!showMetadata);
@@ -197,12 +253,28 @@ function GameScreen({
 
   return (
     <div className="app">
+      <header className="game-header">
+        <div className="header-left">
+          <button className="back-button" onClick={onExit} aria-label="Exit game">
+            ←
+          </button>
+        </div>
+        <div className="header-center">
+          {lastPointsEarned > 0 && (
+            <div className="points-earned-header">
+              +{lastPointsEarned} pts
+            </div>
+          )}
+        </div>
+        <div className="header-right">
+          <div className="score-display">
+            {!isGuest ? `${sessionScore}/${allTimeScore}` : sessionScore}
+          </div>
+        </div>
+      </header>
+
       <div className="game-container">
         <div key={currentWordIndex}>
-          <button className="exit-button" onClick={onExit}>
-            ×
-          </button>
-
           <WordDisplay
             word={currentWord.correctWord.word}
             simpleCategory={currentWord.correctWord.simpleCategory}
@@ -301,12 +373,13 @@ function GameScreen({
 
       <StrikeCounter
         strikes={strikes}
+        hintsRemaining={hintsRemaining}
         currentWord={currentWordIndex + 1}
         totalWords={mode === 'endless' ? undefined : totalWords}
         showMetadata={showMetadata}
         onToggleMetadata={handleToggleMetadata}
         onWinnow={handleWinnow}
-        winnowDisabled={winnowedIndices.length >= 3 || showResult}
+        winnowDisabled={winnowedIndices.length >= 3 || showResult || hintsRemaining === 0}
       />
 
       {/* Global Menu Overlay */}

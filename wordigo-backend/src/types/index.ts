@@ -166,6 +166,7 @@ export interface UserResponse {
   profilePicture?: string | null;
   emailVerified: boolean;
   createdAt: Date;
+  total_points_all_time?: number;
 }
 
 export interface JWTPayload {

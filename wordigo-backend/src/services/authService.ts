@@ -233,7 +233,8 @@ function formatUserResponse(user: any): UserResponse {
     name: user.name,
     profilePicture: user.profilePicture,
     emailVerified: user.emailVerified,
-    createdAt: user.createdAt
+    createdAt: user.createdAt,
+    total_points_all_time: user.total_points_all_time || 0
   };
 }
 
