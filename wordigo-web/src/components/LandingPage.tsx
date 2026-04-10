@@ -28,7 +28,34 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   };
 
   useEffect(() => {
-    fetchLandingWord();
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/landing-word`);
+        const result = await response.json();
+        if (cancelled) return;
+        if (result.success && result.data) {
+          setWordData({
+            wrongDefinition: result.data.wrongDefinition,
+            defOrder: Math.floor(Math.random() * 2)
+          });
+        } else {
+          setError('Failed to load word');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error fetching landing word:', err);
+          setError('Failed to load word');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const fetchLandingWord = async (isRefresh = false) => {

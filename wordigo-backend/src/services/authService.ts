@@ -6,7 +6,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import {
   RegisterRequest,
   LoginRequest,
@@ -48,7 +48,7 @@ export async function registerUser(data: RegisterRequest): Promise<AuthResponse>
   const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
   // Generate verification token
-  const verificationToken = uuidv4();
+  const verificationToken = crypto.randomUUID();
 
   // Create user
   const user = await prisma.users.create({
