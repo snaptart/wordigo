@@ -5,7 +5,9 @@ docs/
 *.txt
 *.psd
 *.jpg
+*.png
 *.PNG
+!wordigo-web/src/assets/**
 *.webp
 wordigo-backend/dist/
 wordigo-backend/src/sockets/
