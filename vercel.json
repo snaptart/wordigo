@@ -5,7 +5,6 @@
   "outputDirectory": "wordigo-web/dist",
   "functions": {
     "wordigo-backend/api/index.ts": {
-      "runtime": "@vercel/node@3",
       "maxDuration": 30,
       "includeFiles": "wordigo-backend/src/**,wordigo-backend/prisma/**,wordigo-backend/node_modules/.prisma/**"
     }
