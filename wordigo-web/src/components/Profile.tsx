@@ -38,7 +38,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onBack, onMenuClick, onLogout, 
     setIsLoading(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const API_URL = import.meta.env.VITE_API_URL || '/api';
 
       // Update basic profile info
       const response = await fetch(`${API_URL}/auth/update-profile`, {
@@ -98,7 +98,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onBack, onMenuClick, onLogout, 
     setIsLoading(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const API_URL = import.meta.env.VITE_API_URL || '/api';
 
       const response = await fetch(`${API_URL}/auth/change-password`, {
         method: 'PUT',
