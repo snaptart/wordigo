@@ -1,12 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd wordigo-backend && npm install && npx prisma generate && cd ../wordigo-web && npm install",
+  "installCommand": "npm install && cd wordigo-backend && npm install && npx prisma generate && cd ../wordigo-web && npm install",
   "buildCommand": "cd wordigo-web && npm run build",
   "outputDirectory": "wordigo-web/dist",
   "functions": {
     "api/index.ts": {
       "maxDuration": 30,
-      "includeFiles": "wordigo-backend/src/**,wordigo-backend/prisma/**,wordigo-backend/node_modules/**"
+      "includeFiles": "wordigo-backend/**"
     }
   },
   "rewrites": [
