@@ -16,7 +16,6 @@
     "hyphenation.en-us": "^0.2.1",
     "hypher": "^0.2.5",
     "jsonwebtoken": "^9.0.2",
-    "syllable": "^5.0.1",
     "uuid": "^13.0.0",
     "zod": "^3.22.4"
   },

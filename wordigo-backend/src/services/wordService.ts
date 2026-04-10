@@ -1078,7 +1078,7 @@ async function fetchPronunciationData(word: string): Promise<PronunciationData |
     };
   } else {
     // Fallback: Use algorithmic syllable counting
-    const syllableCount = await getSyllableCountAlgorithmic(word);
+    const syllableCount = getSyllableCountAlgorithmic(word);
     if (syllableCount > 0) {
       const englishSyllables = syllabifyEnglishWord(word, syllableCount);
       return {

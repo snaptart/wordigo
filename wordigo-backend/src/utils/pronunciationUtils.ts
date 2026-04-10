@@ -7,14 +7,29 @@
  * - Formatting pronunciation data for display
  */
 
-let syllableFn: ((value: string) => number) | null = null;
+/**
+ * Count syllables in an English word using a rule-based approach.
+ * Handles common patterns: silent-e, diphthongs, -le endings, etc.
+ */
+function countSyllables(word: string): number {
+  word = word.toLowerCase().trim();
+  if (word.length <= 2) return 1;
 
-async function loadSyllable() {
-  if (!syllableFn) {
-    const mod = await import('syllable');
-    syllableFn = mod.syllable;
+  // Remove trailing silent-e (but not words like "the")
+  let w = word.replace(/(?:[^laeiouy]e)$/, '');
+  if (w.length === 0) w = word;
+
+  // Count vowel groups (consecutive vowels = one syllable)
+  const vowelGroups = w.match(/[aeiouy]+/g);
+  let count = vowelGroups ? vowelGroups.length : 1;
+
+  // Adjust for common patterns
+  // -le at end adds a syllable (e.g., "table", "simple")
+  if (/le$/.test(word) && word.length > 2 && !/[aeiouy]le$/.test(word)) {
+    count++;
   }
-  return syllableFn;
+
+  return Math.max(1, count);
 }
 
 /**
@@ -147,9 +162,8 @@ export function parseSyllablesFromIPA(ipa: string): {
  * Uses the 'syllable' npm package which provides reasonably accurate
  * syllable counting for English words.
  */
-export async function getSyllableCountAlgorithmic(word: string): Promise<number> {
-  const fn = await loadSyllable();
-  return fn(word);
+export function getSyllableCountAlgorithmic(word: string): number {
+  return countSyllables(word);
 }
 
 /**
