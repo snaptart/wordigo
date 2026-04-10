@@ -7,7 +7,15 @@
  * - Formatting pronunciation data for display
  */
 
-import { syllable } from 'syllable';
+let syllableFn: ((value: string) => number) | null = null;
+
+async function loadSyllable() {
+  if (!syllableFn) {
+    const mod = await import('syllable');
+    syllableFn = mod.syllable;
+  }
+  return syllableFn;
+}
 
 /**
  * Parse syllables from IPA notation
@@ -139,8 +147,9 @@ export function parseSyllablesFromIPA(ipa: string): {
  * Uses the 'syllable' npm package which provides reasonably accurate
  * syllable counting for English words.
  */
-export function getSyllableCountAlgorithmic(word: string): number {
-  return syllable(word);
+export async function getSyllableCountAlgorithmic(word: string): Promise<number> {
+  const fn = await loadSyllable();
+  return fn(word);
 }
 
 /**

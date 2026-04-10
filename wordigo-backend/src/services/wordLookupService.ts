@@ -185,7 +185,7 @@ export async function lookupWord(
       };
     } else {
       // Fallback: Use algorithmic syllable counting
-      const syllableCount = getSyllableCountAlgorithmic(word);
+      const syllableCount = await getSyllableCountAlgorithmic(word);
       if (syllableCount > 0) {
         const englishSyllables = syllabifyEnglishWord(word, syllableCount);
         pronunciation = {
