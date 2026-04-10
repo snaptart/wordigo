@@ -41,7 +41,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       }
       setError(null);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/landing-word`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/landing-word`);
       const result = await response.json();
 
       if (result.success && result.data) {

@@ -1,0 +1,11 @@
+scripts/
+docs/
+*.md
+*.sql
+*.txt
+*.psd
+*.jpg
+*.PNG
+*.webp
+wordigo-backend/dist/
+wordigo-backend/src/sockets/

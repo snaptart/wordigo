@@ -99,7 +99,7 @@ function GameScreen({
         try {
           // Fetch user data from backend to get total_points_all_time
           const token = localStorage.getItem('wordigo_access_token');
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/me`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/auth/me`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
