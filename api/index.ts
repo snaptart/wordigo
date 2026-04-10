@@ -8,7 +8,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import routes from '../src/routes';
+import routes from '../wordigo-backend/src/routes';
 
 const app = express();
 
