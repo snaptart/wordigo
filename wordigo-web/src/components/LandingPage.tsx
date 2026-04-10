@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
+import efTab from '../assets/EF-Tab.png';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -147,7 +148,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     <div className={`landing-page ${isFadingOut ? 'fade-out' : ''}`}>
       {/* Dictionary Tab */}
       <div className="dictionary-tab">
-        <img src="/src/assets/EF-Tab.png" alt="Dictionary tab" />
+        <img src={efTab} alt="Dictionary tab" />
       </div>
       <div className="landing-content">
         {/* Word Display */}
