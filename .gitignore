@@ -39,3 +39,5 @@ logs/
 # Build outputs
 dist/
 build/
+
+.vercel
